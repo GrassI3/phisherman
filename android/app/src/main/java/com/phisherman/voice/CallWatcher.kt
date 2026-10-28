@@ -55,10 +55,24 @@ object CallWatcher {
         registered = null
     }
 
+    /** Live Caption on: Android's own captioning can hear calls, so read its box instead of the mic. */
+    fun liveCaptionOn(ctx: Context): Boolean =
+        android.provider.Settings.Secure.getInt(ctx.contentResolver, "odi_captions_enabled", 0) == 1
+
     private fun startGuard(ctx: Context) {
-        if (CallGuard.state.value.mode != GuardMode.OFF) return
+        val mode = CallGuard.state.value.mode
+        if (mode == GuardMode.MIC || mode == GuardMode.CAPTION) { Log.i(TAG, "call started; already guarding"); return }
+        if (mode == GuardMode.SCRIPT) CallGuard.end(ctx)  // a real call takes over from a demo script
+        if (liveCaptionOn(ctx) && com.phisherman.sms.ChatScreenReader.isEnabled(ctx)) {
+            // Android gives our microphone silence during calls; captions arrive via ChatScreenReader
+            Log.i(TAG, "call started; guarding through Live Caption")
+            CallGuard.begin(ctx, GuardMode.CAPTION)
+            CallGuardNotifier.updateOngoing(ctx, com.phisherman.engine.Level.SAFE)
+            return
+        }
         try {
             ContextCompat.startForegroundService(ctx, Intent(ctx, CallGuardService::class.java).setAction(CallGuardService.ACTION_AUTO))
+            Log.i(TAG, "call started; call guard requested")
         } catch (e: Exception) {
             // Android 12+ can refuse to start a microphone service from the background
             Log.w(TAG, "could not start call guard automatically", e)
@@ -67,7 +81,10 @@ object CallWatcher {
     }
 
     private fun stopGuard(ctx: Context) {
-        if (CallGuard.state.value.mode != GuardMode.MIC) return
-        ctx.startService(Intent(ctx, CallGuardService::class.java).setAction(CallGuardService.ACTION_STOP))
+        when (CallGuard.state.value.mode) {
+            GuardMode.MIC -> ctx.startService(Intent(ctx, CallGuardService::class.java).setAction(CallGuardService.ACTION_STOP))
+            GuardMode.CAPTION -> CallGuard.end(ctx)
+            else -> {}
+        }
     }
 }

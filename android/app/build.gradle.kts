@@ -39,7 +39,7 @@ android {
     }
     androidResources {
         // keep model files uncompressed so they load fast from assets
-        noCompress += listOf("onnx", "json")
+        noCompress += listOf("onnx", "json", "task")
     }
 }
 
@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.onnxruntime.android)
+    implementation(libs.mediapipe.tasks.genai)  // on-device LLM (fine-tuned Gemma 3 270M)
     implementation(libs.kotlinx.serialization.json)
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)

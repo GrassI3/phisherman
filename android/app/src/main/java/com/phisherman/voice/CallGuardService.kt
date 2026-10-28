@@ -37,10 +37,20 @@ class CallGuardService : Service() {
             }
         }
         val n = CallGuardNotifier.ongoing(this, Level.SAFE)
-        if (Build.VERSION.SDK_INT >= 29) {
-            startForeground(CallGuardNotifier.ONGOING_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
-        } else {
-            startForeground(CallGuardNotifier.ONGOING_ID, n)
+        try {
+            if (Build.VERSION.SDK_INT >= 29) {
+                startForeground(CallGuardNotifier.ONGOING_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+            } else {
+                startForeground(CallGuardNotifier.ONGOING_ID, n)
+            }
+        } catch (e: Exception) {
+            // Android 14+ refuses microphone services started from the background (e.g. when a call
+            // begins and Phisherman is not on screen). Report it instead of crashing.
+            Log.w(TAG, "microphone not allowed from background: ${e.message}")
+            CallGuard.onError("Android did not let the call guard use the microphone automatically. Open Call guard and tap Start listening.")
+            CallGuardNotifier.blocked(this)
+            stopSelf()
+            return START_NOT_STICKY
         }
         if (!listening) {
             CallGuard.begin(this, GuardMode.MIC)
@@ -53,6 +63,7 @@ class CallGuardService : Service() {
     private fun startListening() {
         if (!listening) return
         if (Build.VERSION.SDK_INT < 31 || !SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+            Log.w(TAG, "no on-device speech recognition available")
             CallGuard.onError("This phone has no offline speech recognition. Use a demo script instead.")
             return
         }
@@ -71,11 +82,11 @@ class CallGuardService : Service() {
                         if (Build.VERSION.SDK_INT >= 33) r.triggerModelDownload(recognizerIntent())
                     }
                     SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> CallGuard.onError("Microphone permission is needed.")
-                    else -> Log.d(TAG, "recogniser error $error, restarting")
+                    else -> Log.d(TAG, "recogniser error $error (in call: ${CallWatcher.inCall}), restarting")
                 }
                 main.postDelayed({ startListening() }, 400)
             }
-            override fun onReadyForSpeech(p: Bundle?) {}
+            override fun onReadyForSpeech(p: Bundle?) { Log.d(TAG, "ready for speech (in call: ${CallWatcher.inCall})") }
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(v: Float) { CallGuard.onLevel(v) }
             override fun onBufferReceived(b: ByteArray?) {}

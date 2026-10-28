@@ -7,6 +7,9 @@ import android.provider.Telephony
 import android.util.Log
 import com.phisherman.data.DecisionLog
 import com.phisherman.engine.Level
+import com.phisherman.engine.Reason
+import com.phisherman.engine.ScamLlm
+import com.phisherman.engine.Verdict
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,23 +40,49 @@ object SmsHandler {
         ctx: Context, sender: String, body: String, pending: BroadcastReceiver.PendingResult?,
         sourceApp: String? = null,
         recordSafe: Boolean = true,  // false for non-chat apps: only flagged notifications are logged
+        forceNew: Boolean = false,   // the caller knows this is a new copy of an earlier text
+        context: String? = null,     // recent messages of the same chat, for the on-device AI
     ) {
         val app = ctx.applicationContext
         // the same message can arrive twice: dual SIM, or SMS broadcast + Messages notification
-        if (isDuplicate(body)) { Log.d(TAG, "duplicate dropped"); pending?.finish(); return }
+        if (!forceNew && isDuplicate(body)) { Log.d(TAG, "duplicate dropped"); pending?.finish(); return }
         scope.launch {
             try {
-                var v = SmsAnalyser.analyse(app, sender, body, isTrustedName(sender, sourceApp))
+                val trusted = isTrustedName(sender, sourceApp)
+                var v = SmsAnalyser.analyse(app, sender, body, trusted)
+                v = secondOpinion(v, sender, body, context, sourceApp, trusted)
                 if (sourceApp != null) v = v.copy(subject = "$sender · $sourceApp")
                 Log.d(TAG, "verdict ${v.level} ${v.ruleHits} from ${sourceApp ?: "SMS"}")
                 if (recordSafe || v.level != Level.SAFE) DecisionLog.record(app, v)
-                if (v.level != Level.SAFE) SmsNotifier.show(app, v.subject, body, v)
+                if (v.level != Level.SAFE) {
+                    SmsNotifier.show(app, v.subject, body, v)
+                    // the phone may shrink notifications to an edge flash; draw our own banner too
+                    ChatScreenReader.instance?.showBanner(body, v)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "message check failed", e)
             } finally {
                 pending?.finish()
             }
         }
+    }
+
+    private val HEADER = Regex("^[A-Z]{2}-[A-Z0-9]{3,9}(?:-[A-Z])?$")
+
+    /**
+     * The on-device LLM reads the message (or the recent chat) and may RAISE the level, never
+     * lower it. Skipped for trusted senders (bank headers, saved / verified names in SMS apps)
+     * and when the rules already said DANGEROUS.
+     */
+    private suspend fun secondOpinion(v: Verdict, sender: String, body: String, context: String?, sourceApp: String?, trusted: Boolean): Verdict {
+        if (v.level == Level.DANGEROUS || trusted || HEADER.matches(sender.trim()) || "R_ALLOW_SENDER" in v.ruleHits) return v
+        val j = ScamLlm.judge(sourceApp ?: "SMS", sender, context ?: body) ?: return v
+        if (j.level <= v.level) return v
+        val (en, hi) = ScamLlm.reasonText(j.reason)
+        Log.d(TAG, "on-device AI raised ${v.level} -> ${j.level} (${j.reason})")
+        return v.copy(level = j.level, score = maxOf(v.score, if (j.level == Level.DANGEROUS) 90 else 60),
+            reasons = (listOf(Reason("llm_${j.reason}", en, hi)) + v.reasons).take(3),
+            ruleHits = v.ruleHits + "llm:${j.reason}")
     }
 
     /**

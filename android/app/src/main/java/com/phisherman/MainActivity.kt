@@ -54,6 +54,7 @@ import com.phisherman.link.Forwarder
 import androidx.core.content.ContextCompat
 import com.phisherman.link.LinkAnalyser
 import android.content.ComponentName
+import com.phisherman.sms.ChatScreenReader
 import com.phisherman.sms.MessageNotificationListener
 import com.phisherman.sms.SmsAnalyser
 import com.phisherman.voice.CallGuardActivity
@@ -68,6 +69,7 @@ class MainActivity : ComponentActivity() {
     private var smsOn by mutableStateOf(false)
     private var chatOn by mutableStateOf(false)
     private var batteryOk by mutableStateOf(true)
+    private var openChatOn by mutableStateOf(false)
 
     private val roleRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         protectionOn = isLinkHandler()
@@ -94,6 +96,8 @@ class MainActivity : ComponentActivity() {
                         onTurnOnChat = ::openListenerSettings,
                         batteryOk = batteryOk,
                         onFixBattery = ::requestBatteryExemption,
+                        openChatOn = openChatOn,
+                        onTurnOnOpenChat = { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
                         decisions = decisions,
                     )
                 }
@@ -106,6 +110,7 @@ class MainActivity : ComponentActivity() {
         protectionOn = isLinkHandler()
         smsOn = hasSmsProtection()
         chatOn = MessageNotificationListener.isEnabled(this)
+        openChatOn = ChatScreenReader.isEnabled(this)
         batteryOk = getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
     }
 
@@ -174,6 +179,8 @@ private fun HomeScreen(
     onTurnOnChat: () -> Unit,
     batteryOk: Boolean,
     onFixBattery: () -> Unit,
+    openChatOn: Boolean,
+    onTurnOnOpenChat: () -> Unit,
     decisions: List<Decision>,
 ) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
@@ -224,6 +231,15 @@ private fun HomeScreen(
                 Text("Call guard", fontWeight = FontWeight.SemiBold)
                 Text("Listens to a call on speaker and warns you, with strong vibration, when it sounds like a scam. Works offline; nothing is recorded.")
                 Button(onClick = { ctx.startActivity(Intent(ctx, CallGuardActivity::class.java)) }) { Text("Open call guard") }
+            }
+        }
+
+        if (openChatOn) {
+            StatusCard(Color(0xFF1B6E3A), "Open-chat protection is ON", "Incoming messages in the chat you have open (WhatsApp, Instagram, Telegram, Messages) are checked too.")
+        } else {
+            StatusCard(Color(0xFFB26A00), "Open-chat protection is OFF",
+                "When a chat is open, apps send no notification, so new messages there are not checked. Turn on \"Phisherman open-chat check\" in Accessibility. If Android says \"Restricted setting\", open App info > ⋮ > Allow restricted settings first.") {
+                Button(onClick = onTurnOnOpenChat) { Text("Turn on open-chat protection") }
             }
         }
 

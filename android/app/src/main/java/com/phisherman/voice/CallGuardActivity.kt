@@ -50,7 +50,16 @@ import kotlinx.coroutines.launch
 
 /** Call guard screen: risk meter, what was heard, start / stop, and demo scripts. */
 class CallGuardActivity : ComponentActivity() {
+    companion object {
+        const val EXTRA_START = "start_listening"
+    }
+
     private var scriptJob: Job? = null
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra(EXTRA_START, false) && CallGuard.state.value.mode == GuardMode.OFF) requestMic()
+    }
 
     private val micPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         if (ok) startMic() else CallGuard.onError("Microphone permission is needed to listen.")
@@ -77,6 +86,8 @@ class CallGuardActivity : ComponentActivity() {
         enableEdgeToEdge()
         CallGuardNotifier.ensureChannels(this)
         autoOn = Prefs.autoCallGuard(this) && CallWatcher.canWatch(this)
+        // opened from the "tap to start listening" notification during a call: start right away
+        if (intent?.getBooleanExtra(EXTRA_START, false) == true && CallGuard.state.value.mode == GuardMode.OFF) requestMic()
         val scripts = assets.open("voice_scripts.tsv").bufferedReader(Charsets.UTF_8).readLines().drop(1)
             .filter { it.isNotBlank() }.map { it.split("\t") }.map { DemoScript(it[0], it[1], it[2], it[3].split(" || ")) }
         setContent {
@@ -118,6 +129,9 @@ class CallGuardActivity : ComponentActivity() {
                 CallGuard.onFinal(this@CallGuardActivity, line)
                 delay(1200)
             }
+            // end the scripted "call" so a real call can start the guard afterwards
+            delay(4000)
+            if (CallGuard.state.value.mode == GuardMode.SCRIPT) CallGuard.end(this@CallGuardActivity)
         }
     }
 

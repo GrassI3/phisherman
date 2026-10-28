@@ -78,6 +78,26 @@ object CallGuardNotifier {
         NotificationManagerCompat.from(ctx).notify(RED_ID, n)
     }
 
+    /** The automatic start was refused by Android: one tap on this opens the guard to start it by hand. */
+    fun blocked(ctx: Context) {
+        if (!canNotify(ctx)) return
+        ensureChannels(ctx)
+        val n = NotificationCompat.Builder(ctx, CH_ALERT)
+            .setSmallIcon(R.drawable.ic_shield)
+            .setContentTitle("Call guard: tap to start listening")
+            .setContentText("Never share OTP, PIN or card details on a call.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(PendingIntent.getActivity(ctx, 5,
+                Intent(ctx, CallGuardActivity::class.java).putExtra(CallGuardActivity.EXTRA_START, true)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(ctx).notify(RED_ID + 1, n)
+    }
+
+    fun cancelOngoing(ctx: Context) = NotificationManagerCompat.from(ctx).cancel(ONGOING_ID)
+
     fun cancelRed(ctx: Context) = NotificationManagerCompat.from(ctx).cancel(RED_ID)
 
     private fun canNotify(ctx: Context) = android.os.Build.VERSION.SDK_INT < 33 ||

@@ -22,7 +22,7 @@ MAX_LEN = 320
 EPOCHS = 3
 BATCH = 8
 LR = 2e-4
-WEIGHTS = {"uci": 1, "india": 3, "scenario": 6}  # the Indian and scenario data are small: weight them up
+WEIGHTS = {"uci": 1, "india": 3, "scenario": 6, "hf_calls": 1, "hf_dialogue": 1, "hf_hinglish": 2, "bank_genuine": 2}  # the Indian and scenario data are small: weight them up
 
 ANSWER_RE = re.compile(r"(SAFE|SUSPICIOUS|SCAM)\s*\|\s*([a-z_]+)")
 
@@ -36,6 +36,7 @@ def encode(tok, rec):
 
 
 def batches(tok, recs, bs):
+    """Left-padded, so every answer sits at the end of its row (see answer_loss)."""
     for i in range(0, len(recs), bs):
         enc = [encode(tok, r) for r in recs[i:i + bs]]
         n = max(len(x[0]) for x in enc)
@@ -43,8 +44,21 @@ def batches(tok, recs, bs):
         lab = torch.full((len(enc), n), -100)
         att = torch.zeros((len(enc), n), dtype=torch.long)
         for j, (a, b) in enumerate(enc):
-            ids[j, :len(a)] = torch.tensor(a); lab[j, :len(b)] = torch.tensor(b); att[j, :len(a)] = 1
+            ids[j, n - len(a):] = torch.tensor(a); lab[j, n - len(b):] = torch.tensor(b); att[j, n - len(a):] = 1
         yield ids, lab, att
+
+
+def answer_loss(model, ids, lab, att):
+    """Cross-entropy on the answer tokens only, computing logits just for the last K positions.
+
+    Gemma's vocabulary has 262k entries; full-sequence logits for a batch do not fit in 6 GB.
+    With left padding the answers are the last tokens of every row, so K positions are enough.
+    """
+    k = int((lab != -100).sum(dim=1).max()) + 1
+    logits = model(input_ids=ids, attention_mask=att, logits_to_keep=k).logits  # (B, k, V)
+    pred = logits[:, :-1, :].float()
+    target = lab[:, -(k - 1):]
+    return torch.nn.functional.cross_entropy(pred.reshape(-1, pred.size(-1)), target.reshape(-1), ignore_index=-100)
 
 
 @torch.no_grad()
@@ -53,7 +67,7 @@ def predict(model, tok, prompts, bs=16):
     tok.padding_side = "left"
     for i in range(0, len(prompts), bs):
         enc = tok(prompts[i:i + bs], return_tensors="pt", padding=True, add_special_tokens=True).to(model.device)
-        gen = model.generate(**enc, max_new_tokens=10, do_sample=False)
+        gen = model.generate(**enc, max_new_tokens=10, do_sample=False, max_length=None)
         out += tok.batch_decode(gen[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)
     tok.padding_side = "right"
     return out
@@ -79,7 +93,7 @@ def evaluate(model, tok, te, tag):
     recs = to_records(te)
     preds = [parse(t) for t in predict(model, tok, [r["prompt"] for r in recs])]
     res = {"all": metrics([r["label"] for r in recs], [p[0] for p in preds])}
-    for src in ("uci", "india", "scenario"):
+    for src in ("uci", "india", "scenario", "hf_calls", "hf_dialogue", "hf_hinglish", "bank_genuine"):
         idx = [i for i, r in enumerate(recs) if r["src"] == src]
         res[src] = metrics([recs[i]["label"] for i in idx], [preds[i][0] for i in idx])
     res["unparsed"] = sum(p[1] == "unparsed" for p in preds)
@@ -111,7 +125,7 @@ def main():
         recs = train[:]
         __import__("random").Random(ep).shuffle(recs)
         for ids, lab, att in batches(tok, recs, BATCH):
-            loss = model(input_ids=ids.cuda(), attention_mask=att.cuda(), labels=lab.cuda()).loss
+            loss = answer_loss(model, ids.cuda(), lab.cuda(), att.cuda())
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             opt.step(); sched.step(); opt.zero_grad()

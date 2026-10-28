@@ -19,7 +19,8 @@ fun interface ContextJudge {
     suspend fun judge(source: String, sender: String, text: String): Judgement?
 }
 
-enum class GuardMode { OFF, MIC, SCRIPT }
+/** MIC = our own speech recogniser; CAPTION = reading the system Live Caption box during a call. */
+enum class GuardMode { OFF, MIC, SCRIPT, CAPTION }
 
 data class GuardState(
     val mode: GuardMode = GuardMode.OFF,
@@ -71,6 +72,30 @@ object CallGuard {
         val s = session ?: return
         s.addFinal(text)
         publish(ctx, s, partial = "")
+        maybeAskLlm(ctx, s)
+    }
+
+    private var lastCaption = ""
+
+    /**
+     * Text of the Live Caption box during a call. The box shows the last line or two and keeps
+     * changing; when it moves on to new text, the old text is committed to the transcript.
+     */
+    @Synchronized
+    fun onCaption(ctx: Context, text: String) {
+        if (session == null || _state.value.mode != GuardMode.CAPTION) {
+            if (!CallWatcher.inCall) return
+            begin(ctx, GuardMode.CAPTION)
+            CallGuardNotifier.updateOngoing(ctx, Level.SAFE)
+            lastCaption = ""
+        }
+        val s = session ?: return
+        if (text == lastCaption) return
+        val anchor = lastCaption.takeLast(25)
+        if (lastCaption.isNotEmpty() && anchor !in text) s.addFinal(lastCaption)
+        lastCaption = text
+        s.setPartial(text)
+        publish(ctx, s, partial = text)
         maybeAskLlm(ctx, s)
     }
 
@@ -138,6 +163,11 @@ object CallGuard {
         llmJob?.cancel()
         CallAlerts.stop(ctx)
         CallGuardNotifier.cancelRed(ctx)
+        if (_state.value.mode == GuardMode.CAPTION) {
+            if (lastCaption.isNotEmpty()) s.addFinal(lastCaption)
+            lastCaption = ""
+            CallGuardNotifier.cancelOngoing(ctx)
+        }
         val level = s.latched.coerceAtLeast(s.llm?.level ?: Level.SAFE)
         val reasons = reasonsFor(ctx, s.seen.toList())
         val v = Verdict(Channel.VOICE, s.maxScore, level, reasons.take(4), null,

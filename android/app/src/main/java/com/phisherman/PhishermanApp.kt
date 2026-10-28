@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.ComponentName
 import android.service.notification.NotificationListenerService
 import com.phisherman.sms.MessageNotificationListener
+import com.phisherman.engine.ScamLlm
+import com.phisherman.voice.CallGuard
 import com.phisherman.voice.CallWatcher
 import com.phisherman.sms.SmsAnalyser
 import com.phisherman.sms.SmsNotifier
@@ -24,6 +26,11 @@ class PhishermanApp : Application() {
         }
         CallWatcher.start(this)
         // load the models early so the first link tap or SMS is fast
-        scope.launch { SmsAnalyser.init(this@PhishermanApp) }
+        scope.launch {
+            SmsAnalyser.init(this@PhishermanApp)
+            // the on-device LLM is optional: when its file is bundled and loads, it becomes the
+            // second opinion for chats and the call guard
+            if (ScamLlm.available(this@PhishermanApp) && ScamLlm.init(this@PhishermanApp)) CallGuard.judge = ScamLlm
+        }
     }
 }

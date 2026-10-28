@@ -1,0 +1,266 @@
+{
+  "generated": "2026-10-28",
+  "base_model": "unsloth/gemma-3-270m-it",
+  "lora": {
+    "r": 16,
+    "alpha": 32
+  },
+  "epochs": 3,
+  "train_examples_weighted": 2026,
+  "base": {
+    "all": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 431,
+      "tp": 0,
+      "fp": 0,
+      "fn": 160,
+      "tn": 271
+    },
+    "uci": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 365,
+      "tp": 0,
+      "fp": 0,
+      "fn": 131,
+      "tn": 234
+    },
+    "india": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 48,
+      "tp": 0,
+      "fp": 0,
+      "fn": 18,
+      "tn": 30
+    },
+    "scenario": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 18,
+      "tp": 0,
+      "fp": 0,
+      "fn": 11,
+      "tn": 7
+    },
+    "unparsed": 431
+  },
+  "fine_tuned": {
+    "all": {
+      "precision": 0.95,
+      "recall": 0.95,
+      "fpr": 0.0295,
+      "f1": 0.95,
+      "n": 431,
+      "tp": 152,
+      "fp": 8,
+      "fn": 8,
+      "tn": 263
+    },
+    "uci": {
+      "precision": 0.9766,
+      "recall": 0.9542,
+      "fpr": 0.0128,
+      "f1": 0.9653,
+      "n": 365,
+      "tp": 125,
+      "fp": 3,
+      "fn": 6,
+      "tn": 231
+    },
+    "india": {
+      "precision": 0.8182,
+      "recall": 1.0,
+      "fpr": 0.1333,
+      "f1": 0.9,
+      "n": 48,
+      "tp": 18,
+      "fp": 4,
+      "fn": 0,
+      "tn": 26
+    },
+    "scenario": {
+      "precision": 0.9,
+      "recall": 0.8182,
+      "fpr": 0.1429,
+      "f1": 0.8571,
+      "n": 18,
+      "tp": 9,
+      "fp": 1,
+      "fn": 2,
+      "tn": 6
+    },
+    "unparsed": 0
+  },
+  "errors": [
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "Hi, Mobile no.  &lt;#&gt;  has added you in their contact list on www.fullonsms.com It s a great place to send free sms to people For more visit fullonsms.com\nR"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "thisisnotawebsitedotcom.com lol gravity falls is crazy\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "credential_request"
+      ],
+      "text": "Dear Customer, 482910 is your OTP for login to SBI Online. Do not share it with anyone. SBI never asks for OTP.\nReply: LABEL | reason<end_of_turn>\n<start_of_tur"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "SMS. ac JSco: Energy is high, but u may not know where 2channel it. 2day ur leadership skills r strong. Psychic? Reply ANS w/question. End? Reply END JSCO\nReply"
+    },
+    {
+      "src": "scenario",
+      "kind": "call",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "credential_request"
+      ],
+      "text": "You: Hi, I called to block my lost debit card.\nCaller: Sure, I have blocked the card ending 4321.\nCaller: A new card will be sent to your registered address in "
+    },
+    {
+      "src": "scenario",
+      "kind": "chat",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "Them: Hey dear, I saw your profile. I trade crypto and make good money\nThem: I can teach you, it's easy. Start with just 20k on this platform\nThem: Trust me, I "
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "Location bhej raha hoon https://maps.google.com/?q=28.6315,77.2167\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "Do you ever notice that when you're driving, anyone going slower than you is an idiot and everyone driving faster than you is a maniac?\nReply: LABEL | reason<en"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "ROMCAPspam Everyone around should be responding well to your presence since you are so warm and outgoing. You are bringing in a real breath of sunshine.\nReply: "
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "other_scam"
+      ],
+      "text": "They have a thread on the wishlist section of the forums where ppl post nitro requests. Start from the last page and collect from the bottom up.\nReply: LABEL | "
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "Filthy stories and GIRLS waiting for your\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "This message is brought to you by GMW Ltd. and is not connected to the\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "prize_lottery"
+      ],
+      "text": "Do u ever get a song stuck in your head for no reason and it won't go away til u listen to it like 5 times?\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>mo"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "New song is out https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "scenario",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "Papa ye mera naya number hai, purana phone kharab ho gaya. Abhi 20,000 bhej do please, emergency hai, ghar aake batata hoon\nReply: LABEL | reason<end_of_turn>\n<"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "FreeMsg>FAV XMAS TONES!Reply REAL\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    }
+  ]
+}

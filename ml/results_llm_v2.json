@@ -1,0 +1,342 @@
+{
+  "generated": "2026-10-28",
+  "base_model": "unsloth/gemma-3-270m-it",
+  "lora": {
+    "r": 16,
+    "alpha": 32
+  },
+  "epochs": 3,
+  "train_examples_weighted": 4171,
+  "base": {
+    "all": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 959,
+      "tp": 0,
+      "fp": 0,
+      "fn": 467,
+      "tn": 492
+    },
+    "uci": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 365,
+      "tp": 0,
+      "fp": 0,
+      "fn": 131,
+      "tn": 234
+    },
+    "india": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 48,
+      "tp": 0,
+      "fp": 0,
+      "fn": 18,
+      "tn": 30
+    },
+    "scenario": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 18,
+      "tp": 0,
+      "fp": 0,
+      "fn": 11,
+      "tn": 7
+    },
+    "hf_calls": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 149,
+      "tp": 0,
+      "fp": 0,
+      "fn": 127,
+      "tn": 22
+    },
+    "hf_dialogue": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 320,
+      "tp": 0,
+      "fp": 0,
+      "fn": 160,
+      "tn": 160
+    },
+    "hf_hinglish": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "fpr": 0.0,
+      "f1": 0.0,
+      "n": 59,
+      "tp": 0,
+      "fp": 0,
+      "fn": 20,
+      "tn": 39
+    },
+    "unparsed": 959
+  },
+  "fine_tuned": {
+    "all": {
+      "precision": 0.9787,
+      "recall": 0.985,
+      "fpr": 0.0203,
+      "f1": 0.9819,
+      "n": 959,
+      "tp": 460,
+      "fp": 10,
+      "fn": 7,
+      "tn": 482
+    },
+    "uci": {
+      "precision": 0.9766,
+      "recall": 0.9542,
+      "fpr": 0.0128,
+      "f1": 0.9653,
+      "n": 365,
+      "tp": 125,
+      "fp": 3,
+      "fn": 6,
+      "tn": 231
+    },
+    "india": {
+      "precision": 0.75,
+      "recall": 1.0,
+      "fpr": 0.2,
+      "f1": 0.8571,
+      "n": 48,
+      "tp": 18,
+      "fp": 6,
+      "fn": 0,
+      "tn": 24
+    },
+    "scenario": {
+      "precision": 0.9091,
+      "recall": 0.9091,
+      "fpr": 0.1429,
+      "f1": 0.9091,
+      "n": 18,
+      "tp": 10,
+      "fp": 1,
+      "fn": 1,
+      "tn": 6
+    },
+    "hf_calls": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "fpr": 0.0,
+      "f1": 1.0,
+      "n": 149,
+      "tp": 127,
+      "fp": 0,
+      "fn": 0,
+      "tn": 22
+    },
+    "hf_dialogue": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "fpr": 0.0,
+      "f1": 1.0,
+      "n": 320,
+      "tp": 160,
+      "fp": 0,
+      "fn": 0,
+      "tn": 160
+    },
+    "hf_hinglish": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "fpr": 0.0,
+      "f1": 1.0,
+      "n": 59,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "tn": 39
+    },
+    "unparsed": 0
+  },
+  "errors": [
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "New song is out https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "Do you ever notice that when you're driving, anyone going slower than you is an idiot and everyone driving faster than you is a maniac?\nReply: LABEL | reason<en"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "other_scam"
+      ],
+      "text": "Your PAN application acknowledgement number 881234567890 has been received. Track status on the official NSDL website.\nReply: LABEL | reason<end_of_turn>\n<start"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "credential_request"
+      ],
+      "text": "Dear Customer, 482910 is your OTP for login to SBI Online. Do not share it with anyone. SBI never asks for OTP.\nReply: LABEL | reason<end_of_turn>\n<start_of_tur"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "credential_request"
+      ],
+      "text": "Your OTP for ICICI Bank NetBanking is 773201. Never share OTP with anyone including bank staff.\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "Filthy stories and GIRLS waiting for your\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "ROMCAPspam Everyone around should be responding well to your presence since you are so warm and outgoing. You are bringing in a real breath of sunshine.\nReply: "
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "other_scam"
+      ],
+      "text": "They have a thread on the wishlist section of the forums where ppl post nitro requests. Start from the last page and collect from the bottom up.\nReply: LABEL | "
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "prize_lottery"
+      ],
+      "text": "Do u ever get a song stuck in your head for no reason and it won't go away til u listen to it like 5 times?\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>mo"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "You have an important customer service announcement from PREMIER.\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "Hi, Mobile no.  &lt;#&gt;  has added you in their contact list on www.fullonsms.com It s a great place to send free sms to people For more visit fullonsms.com\nR"
+    },
+    {
+      "src": "scenario",
+      "kind": "msg",
+      "true": "SUSPICIOUS",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "Hey, is this you in this video? Everyone is sharing it\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "Location bhej raha hoon https://maps.google.com/?q=28.6315,77.2167\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "india",
+      "kind": "msg",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "link_lure"
+      ],
+      "text": "Join the meeting at 5: https://meet.google.com/abc-defg-hij\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "0A$NETWORKS allow companies to bill for SMS, so they are responsible for their \"suppliers\", just as a shop has to give a guarantee on what they sell. B. G.\nRepl"
+    },
+    {
+      "src": "uci",
+      "kind": "msg",
+      "true": "SCAM",
+      "pred": [
+        "SAFE",
+        "none"
+      ],
+      "text": "This message is brought to you by GMW Ltd. and is not connected to the\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    },
+    {
+      "src": "scenario",
+      "kind": "call",
+      "true": "SAFE",
+      "pred": [
+        "SCAM",
+        "credential_request"
+      ],
+      "text": "You: Hi, I called to block my lost debit card.\nCaller: Sure, I have blocked the card ending 4321.\nCaller: A new card will be sent to your registered address in "
+    }
+  ]
+}

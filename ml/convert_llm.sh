@@ -33,8 +33,8 @@ bundler.create_bundle(bundler.BundleConfig(
     tflite_model=sys.argv[1], tokenizer_model=sys.argv[2],
     start_token="<bos>", stop_tokens=["<eos>", "<end_of_turn>"],
     output_filename=sys.argv[3],
-    prompt_prefix="<start_of_turn>user\n",                    # must match ml/llm_data.py
-    prompt_suffix="<end_of_turn>\n<start_of_turn>model\n",
+    # no prompt_prefix / prompt_suffix: the app writes the full Gemma turn template itself
+    # (sms/ScamLlm.kt), byte for byte the same as ml/llm_data.py
 ))
 print("task:", sys.argv[3])
 PY

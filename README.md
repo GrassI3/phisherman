@@ -27,6 +27,13 @@ Every dataset used, with exact name, version, source and date. Raw files live in
 | Phishing.Database: `phishing-links-ACTIVE.txt` | ~66 MB of phishing URLs, no benign | Fresh-phishing recall check (model-only numbers reported separately from blocklist hits). Processed as text only; never opened | master | MIT | same as above | Planned |
 | UCI SMS Spam Collection | 5,574 English SMS: ham / spam | SMS model: training and test (English volume) | v1, downloaded 2026-10-28 | CC BY 4.0 | https://archive.ics.uci.edu/dataset/228 | Downloaded |
 
+| Indian Cyber Scam PhoneCall Hinglish (`ysangam`) | 10,000 rows but **only 743 unique texts** (633 scam / 110 normal; the rest are template copies). Hinglish call snippets: digital arrest, police blackmail, KYC, Aadhaar, lottery, relative. Its `scam_category` column is unreliable, so reasons are re-derived from the text | On-device LLM: call-style training / test | downloaded 2026-10-28 | Apache-2.0 | https://huggingface.co/datasets/ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset | Downloaded |
+| BothBosu/scam-dialogue | 1,598 synthetic English phone conversations (800 scam / 798 normal; SSN, refund, tech support, reward, delivery, insurance, telemarketing, wrong number). Each is cut to a ~600-character window from a third of the way in | On-device LLM: multi-turn call training / test | downloaded 2026-10-28 | Apache-2.0 | https://huggingface.co/datasets/BothBosu/scam-dialogue | Downloaded |
+| bolewara/hinglish-scam-text-dataset | ~3,800 texts, mostly copies of UCI; only the 196 rows not in UCI are used | On-device LLM: extra SMS / Hinglish | downloaded 2026-10-28 | CC BY 4.0 | https://huggingface.co/bolewara/hinglish-scam-text-dataset | Downloaded |
+| Gemma 3 270M instruction-tuned (`unsloth/gemma-3-270m-it`, ungated mirror of `google/gemma-3-270m-it`) | Base model for the on-device scam LLM | Fine-tuned with LoRA | downloaded 2026-10-28 | Gemma Terms of Use | https://huggingface.co/unsloth/gemma-3-270m-it | Downloaded |
+
+Not used, for the record: Spam SMS in Hindi (IEEE DataPort; licence unclear, needs an account), COVA / COVA-X synthetic multi-turn smishing (download not located), ScamBench (broad aggregate including prompt-injection data; needs filtering).
+
 ### Hand-made datasets (ours)
 
 | Dataset | Contents | Used for | Status |
@@ -38,7 +45,9 @@ Every dataset used, with exact name, version, source and date. Raw files live in
 | `ml/test_links.txt` | 10 device test links L1–L10 from PS4 §13.2; phishing-like ones use non-resolving `.example` domains | Device acceptance tests | Done (not committed) |
 | Voice scripts | About 12 scam-call scripts and 12 normal-call scripts, recorded in our own voices | Voice detection rate, time to amber / red, false alarms | To create (Phase 4) |
 | `brands.json` | Brand tokens, official registrable domains, homoglyph map | URL features 16–17 and SMS rule R_BRAND_LINK | Done; every official domain still needs manual verification |
-| `voice_rules.json` | Phrase categories and weights in English / Hindi / Hinglish | Voice scorer | To create (Phase 4) |
+| `voice_rules.json` | Phrase categories and weights in English / Hindi / Hinglish (credential, remote access, payment, authority, threat, lure, secrecy) and two combination bonuses | Voice scorer | Done |
+| `voice_scripts.tsv` | 16 scripted calls: 9 scam (PS4 V1 plus digital arrest, CVV reward, electricity, customs, Paytm, TRAI), 5 normal, 2 customer-care; `[PAY]` marks the payment demand | Voice tests and in-app demo scripts | Done |
+| `ml/llm_scenarios.tsv` | 58 hand-written cases for the LLM: no-link scams (family impersonation, fake CEO, OLX QR), multi-message chats, call transcripts, and tricky genuine ones (bank credit alerts, office payments, family money requests). All synthetic | On-device LLM training / test | Done |
 
 ### Known leakage: URL-Phish
 
