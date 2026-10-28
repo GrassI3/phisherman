@@ -1,0 +1,7 @@
+{
+  "link": {
+    "suspicious": 0.6791080165633615,
+    "dangerous": 0.8986595013914959,
+    "rule": "precision >= 0.9 / 0.98 on held-out test"
+  }
+}

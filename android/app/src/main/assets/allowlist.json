@@ -1,0 +1,20 @@
+{
+  "version": "allow-1",
+  "note": "Registrable domains that return SAFE without running the model. Checked before the blocklist. Never applies when the host is on a free-hosting platform (features.FREE_HOSTS), e.g. sites.google.com. Official brand domains from brands.json are allowlisted too.",
+  "domains": [
+    "google.com", "google.co.in", "youtube.com", "gmail.com", "android.com",
+    "wikipedia.org", "wikimedia.org",
+    "whatsapp.com", "facebook.com", "instagram.com", "linkedin.com", "x.com", "twitter.com", "reddit.com",
+    "microsoft.com", "microsoftonline.com", "live.com", "office.com", "apple.com", "icloud.com",
+    "github.com", "stackoverflow.com", "python.org",
+    "amazon.in", "amazon.com", "flipkart.com", "myntra.com", "swiggy.com", "zomato.com",
+    "makemytrip.com", "bookmyshow.com", "hotstar.com", "netflix.com", "spotify.com",
+    "zerodha.com", "nseindia.com", "bseindia.com", "moneycontrol.com",
+    "sbi.co.in", "onlinesbi.sbi", "hdfcbank.com", "icicibank.com", "axisbank.com", "axisbank.co.in", "kotak.com",
+    "pnbindia.in", "bankofbaroda.in", "unionbankofindia.co.in", "canarabank.com",
+    "paytm.com", "phonepe.com", "npci.org.in", "bhimupi.org.in", "rbi.org.in",
+    "india.gov.in", "uidai.gov.in", "incometax.gov.in", "irctc.co.in", "indiapost.gov.in",
+    "digilocker.gov.in", "epfindia.gov.in", "cybercrime.gov.in", "mygov.in", "gst.gov.in",
+    "passportindia.gov.in", "parivahan.gov.in"
+  ]
+}

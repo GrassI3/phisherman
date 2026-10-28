@@ -1,0 +1,33 @@
+{
+  "version": "brands-1",
+  "note": "Verify every official domain by hand before relying on it. A wrong entry causes a missed attack or a false alarm.",
+  "tokens": [
+    "sbi", "onlinesbi", "hdfc", "icici", "axisbank", "kotak", "paytm", "phonepe", "gpay",
+    "amazon", "flipkart", "irctc", "indiapost", "incometax", "uidai", "aadhaar", "npci", "bhim"
+  ],
+  "official": [
+    "sbi.co.in", "onlinesbi.sbi", "hdfcbank.com", "icicibank.com", "axisbank.com", "axisbank.co.in", "kotak.com",
+    "paytm.com", "phonepe.com", "amazon.in", "amazon.com", "flipkart.com", "irctc.co.in",
+    "indiapost.gov.in", "incometax.gov.in", "uidai.gov.in", "npci.org.in", "bhimupi.org.in",
+    "google.com"
+  ],
+  "brand_domains": {
+    "sbi": ["sbi.co.in", "onlinesbi.sbi"],
+    "hdfc": ["hdfcbank.com"],
+    "icici": ["icicibank.com"],
+    "axisbank": ["axisbank.com", "axisbank.co.in"],
+    "kotak": ["kotak.com"],
+    "paytm": ["paytm.com"],
+    "phonepe": ["phonepe.com"],
+    "amazon": ["amazon.in", "amazon.com"],
+    "flipkart": ["flipkart.com"],
+    "irctc": ["irctc.co.in"],
+    "indiapost": ["indiapost.gov.in"],
+    "incometax": ["incometax.gov.in"],
+    "uidai": ["uidai.gov.in"],
+    "aadhaar": ["uidai.gov.in"],
+    "npci": ["npci.org.in"],
+    "bhim": ["bhimupi.org.in", "npci.org.in"]
+  },
+  "homoglyphs": { "0": "o", "1": "l", "3": "e", "5": "s", "rn": "m", "vv": "w" }
+}

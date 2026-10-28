@@ -1,0 +1,66 @@
+"""Reference link decision logic. The Kotlin UrlAnalyser / RiskEngine must give the same levels.
+
+Order: scheme check -> allowlist -> blocklist -> shortener (always SUSPICIOUS: its string says
+nothing about the destination) -> model + thresholds -> brand lookalike on a non-official domain
+raises SAFE to SUSPICIOUS.
+"""
+import json
+from pathlib import Path
+
+import numpy as np
+import onnxruntime as ort
+
+from bloom import Bloom
+from build_blocklist import norm_host
+from features import FEATURE_NAMES, SHORTENERS, features, is_free_host, load_brands, parse
+
+ASSETS = Path(__file__).resolve().parent.parent / "android/app/src/main/assets"
+LEVELS = ["SAFE", "SUSPICIOUS", "DANGEROUS"]
+BRAND_LOOKALIKE_MAX_LEV = 0.25  # normalised edit distance; 0.0 = exact brand token after de-glyphing
+I_BRAND_LEV = FEATURE_NAMES.index("brand_min_lev")
+
+
+class LinkEngine:
+    def __init__(self):
+        self.brands = load_brands()
+        self.allow = set(json.load(open(ASSETS / "allowlist.json"))["domains"]) | set(self.brands["official"])
+        meta = json.load(open(ASSETS / "blocklist.json"))
+        self.bloom = Bloom(meta["m_bits"], meta["k"])
+        self.bloom.bits = bytearray((ASSETS / "blocklist.bloom").read_bytes())
+        th = json.load(open(ASSETS / "thresholds.json"))["link"]
+        self.thr_s, self.thr_d = th["suspicious"], th["dangerous"]
+        self.sess = ort.InferenceSession(str(ASSETS / "link_model.onnx"))
+
+    def prob(self, url, f=None):
+        x = np.array([f if f is not None else features(url, self.brands)], dtype=np.float32)
+        return float(self.sess.run(None, {"input": x})[1][0, 1])
+
+    def decide(self, url, use_lists=True):
+        """Return (level, reason_id, model_prob). level is None for non-http(s) input."""
+        s = url.strip()
+        scheme = s.split(":", 1)[0].lower() if ":" in s.split("/", 1)[0] else ""
+        if scheme and scheme not in ("http", "https"):
+            return None, "not_http", None
+        _, _, host, is_ip, reg, _ = parse(s)
+        if use_lists and not is_ip:
+            if reg in self.allow and not is_free_host(host, reg):
+                return "SAFE", "allowlist", None
+            if norm_host(host) in self.bloom or (reg and reg in self.bloom):
+                return "DANGEROUS", "blocklist", None
+        if host in SHORTENERS:
+            return "SUSPICIOUS", "shortener", None
+        f = features(s, self.brands)
+        p = self.prob(s, f)
+        level = 2 if p >= self.thr_d else 1 if p >= self.thr_s else 0
+        reason = "model"
+        if level == 0 and f[I_BRAND_LEV] <= BRAND_LOOKALIKE_MAX_LEV and reg not in self.brands["official"]:
+            level, reason = 1, "brand_lookalike"
+        return LEVELS[level], reason, p
+
+
+if __name__ == "__main__":
+    import sys
+    e = LinkEngine()
+    for u in sys.argv[1:]:
+        print(u, e.decide(u))
+    assert len(FEATURE_NAMES) == 19

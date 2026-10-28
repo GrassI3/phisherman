@@ -1,0 +1,385 @@
+{
+  "generated": "2026-10-28",
+  "model": "RandomForest(n_estimators=120, max_depth=14)",
+  "feature_version": "link-features-2",
+  "datasets": {
+    "train_test": "URL-Phish v2 + pirocheto/phishing-url (split by registrable domain)",
+    "unseen": "PhiUSIIL (UCI 967), domains seen in training removed"
+  },
+  "thresholds": {
+    "suspicious": 0.6791080165633615,
+    "dangerous": 0.8986595013914959
+  },
+  "test": {
+    "suspicious": {
+      "precision": 0.9002,
+      "recall": 0.8332,
+      "fdr": 0.8332,
+      "fpr": 0.0213,
+      "f1": 0.8654,
+      "n": 25156,
+      "n_phishing": 4718,
+      "tp": 3931,
+      "fp": 436,
+      "fn": 787,
+      "tn": 20002
+    },
+    "dangerous": {
+      "precision": 0.9802,
+      "recall": 0.5244,
+      "fdr": 0.5244,
+      "fpr": 0.0024,
+      "f1": 0.6832,
+      "n": 25156,
+      "n_phishing": 4718,
+      "tp": 2474,
+      "fp": 50,
+      "fn": 2244,
+      "tn": 20388
+    }
+  },
+  "unseen": {
+    "suspicious": {
+      "precision": 0.9806,
+      "recall": 0.3161,
+      "fdr": 0.3161,
+      "fpr": 0.0032,
+      "f1": 0.478,
+      "n": 184543,
+      "n_phishing": 63007,
+      "tp": 19914,
+      "fp": 394,
+      "fn": 43093,
+      "tn": 121142
+    },
+    "dangerous": {
+      "precision": 0.9973,
+      "recall": 0.1493,
+      "fdr": 0.1493,
+      "fpr": 0.0002,
+      "f1": 0.2596,
+      "n": 184543,
+      "n_phishing": 63007,
+      "tp": 9404,
+      "fp": 25,
+      "fn": 53603,
+      "tn": 121511
+    }
+  },
+  "test_by_source": {
+    "url_phish": {
+      "precision": 0.9177,
+      "recall": 0.8893,
+      "fdr": 0.8893,
+      "fpr": 0.0154,
+      "f1": 0.9033,
+      "n": 23132,
+      "n_phishing": 3739,
+      "tp": 3325,
+      "fp": 298,
+      "fn": 414,
+      "tn": 19095
+    },
+    "pirocheto": {
+      "precision": 0.8145,
+      "recall": 0.619,
+      "fdr": 0.619,
+      "fpr": 0.1321,
+      "f1": 0.7034,
+      "n": 2024,
+      "n_phishing": 979,
+      "tp": 606,
+      "fp": 138,
+      "fn": 373,
+      "tn": 907
+    }
+  },
+  "feature_importance": [
+    [
+      "digit_ratio",
+      0.1985
+    ],
+    [
+      "free_host",
+      0.153
+    ],
+    [
+      "url_len",
+      0.1301
+    ],
+    [
+      "path_len",
+      0.1112
+    ],
+    [
+      "is_https",
+      0.0772
+    ],
+    [
+      "host_entropy",
+      0.0764
+    ],
+    [
+      "host_len",
+      0.0525
+    ],
+    [
+      "dot_count",
+      0.0441
+    ],
+    [
+      "subdomain_depth",
+      0.0415
+    ],
+    [
+      "brand_min_lev",
+      0.0357
+    ],
+    [
+      "hyphen_count_host",
+      0.0261
+    ],
+    [
+      "susp_words",
+      0.0218
+    ],
+    [
+      "num_params",
+      0.0116
+    ],
+    [
+      "special_chars",
+      0.0106
+    ],
+    [
+      "tld_risk",
+      0.0081
+    ],
+    [
+      "is_shortener",
+      0.0009
+    ],
+    [
+      "has_ip_host",
+      0.0004
+    ],
+    [
+      "brand_in_subdomain",
+      0.0003
+    ],
+    [
+      "has_at",
+      0.0
+    ]
+  ],
+  "onnx_max_abs_diff": 1.7319142187055547e-07,
+  "onnx_outputs": [
+    "label",
+    "probabilities"
+  ],
+  "onnx_bytes": 10925328,
+  "extras": {
+    "parity_urls": 30,
+    "hard_negatives": {
+      "n": 40,
+      "fpr_model_only": 0.375,
+      "fpr_engine": 0.0,
+      "flagged_model_only": [
+        [
+          "https://retail.onlinesbi.sbi/retail/login.htm",
+          "SUSPICIOUS",
+          0.869
+        ],
+        [
+          "https://cybercrime.gov.in/Webform/Accept.aspx",
+          "SUSPICIOUS",
+          0.821
+        ],
+        [
+          "https://services.gst.gov.in/services/login",
+          "SUSPICIOUS",
+          0.819
+        ],
+        [
+          "https://parivahan.gov.in/rcdlstatus/?pur_cd=101",
+          "SUSPICIOUS",
+          0.872
+        ],
+        [
+          "https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&service=mail&flowName=GlifWebSignIn",
+          "SUSPICIOUS",
+          0.86
+        ],
+        [
+          "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=4765445b-32c6-49b0-83e6-1d93765276ca&response_type=code&scope=openid",
+          "DANGEROUS",
+          0.944
+        ],
+        [
+          "https://www.flipkart.com/account/login?ret=/",
+          "SUSPICIOUS",
+          0.75
+        ],
+        [
+          "https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin",
+          "SUSPICIOUS",
+          0.72
+        ],
+        [
+          "https://github.com/login?return_to=%2Fsettings%2Fsecurity",
+          "DANGEROUS",
+          0.944
+        ],
+        [
+          "https://paytm.com/recharge",
+          "SUSPICIOUS",
+          0.867
+        ],
+        [
+          "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890&index=3",
+          "SUSPICIOUS",
+          0.76
+        ],
+        [
+          "https://www.google.com/maps/search/railway+station+near+connaught+place+new+delhi/@28.6315,77.2167,15z?entry=ttu",
+          "SUSPICIOUS",
+          0.822
+        ],
+        [
+          "https://docs.google.com/forms/d/e/1FAIpQLSf_example_form_id_1234567890/viewform?usp=sf_link",
+          "DANGEROUS",
+          0.92
+        ],
+        [
+          "https://kite.zerodha.com/connect/login?v=3&api_key=kitefront",
+          "SUSPICIOUS",
+          0.743
+        ],
+        [
+          "https://secure.hdfcbank.com/login/verify",
+          "DANGEROUS",
+          0.906
+        ]
+      ],
+      "flagged_engine": []
+    },
+    "test_links": [
+      {
+        "id": "L1",
+        "url": "https://examplebank-kyc-update.example/login",
+        "expected": "DANGEROUS (brand lookalike + words)",
+        "got": "DANGEROUS",
+        "reason": "model",
+        "prob": 0.985,
+        "pass": true
+      },
+      {
+        "id": "L2",
+        "url": "http://203.0.113.10/verify/account",
+        "expected": "DANGEROUS or SUSPICIOUS (IP host)",
+        "got": "DANGEROUS",
+        "reason": "model",
+        "prob": 0.96,
+        "pass": true
+      },
+      {
+        "id": "L3",
+        "url": "https://examplebank.com@login-check.example/",
+        "expected": "SUSPICIOUS or higher (@ in URL)",
+        "got": "DANGEROUS",
+        "reason": "model",
+        "prob": 0.92,
+        "pass": true
+      },
+      {
+        "id": "L4",
+        "url": "https://login.secure.examplebank.com.attacker.example/",
+        "expected": "DANGEROUS (deep nesting)",
+        "got": "DANGEROUS",
+        "reason": "model",
+        "prob": 0.899,
+        "pass": true
+      },
+      {
+        "id": "L5",
+        "url": "https://bit.ly/example",
+        "expected": "SUSPICIOUS (shortener hides destination)",
+        "got": "SUSPICIOUS",
+        "reason": "shortener",
+        "prob": null,
+        "pass": true
+      },
+      {
+        "id": "L6",
+        "url": "https://www.wikipedia.org/",
+        "expected": "SAFE (forwarded silently)",
+        "got": "SAFE",
+        "reason": "allowlist",
+        "prob": null,
+        "pass": true
+      },
+      {
+        "id": "L7",
+        "url": "https://www.hdfcbank.com/",
+        "expected": "SAFE (allowlist)",
+        "got": "SAFE",
+        "reason": "allowlist",
+        "prob": null,
+        "pass": true
+      },
+      {
+        "id": "L8",
+        "url": "https://www.google.com/maps/search/railway+station+near+connaught+place+new+delhi/@28.6315,77.2167,15z?entry=ttu",
+        "expected": "SAFE (hard negative)",
+        "got": "SAFE",
+        "reason": "allowlist",
+        "prob": null,
+        "pass": true
+      },
+      {
+        "id": "L9",
+        "url": "https://paytrn.example/",
+        "expected": "SUSPICIOUS or higher (brand typo)",
+        "got": "SUSPICIOUS",
+        "reason": "brand_lookalike",
+        "prob": 0.217,
+        "pass": true
+      },
+      {
+        "id": "L10",
+        "url": "tel:1930",
+        "expected": "Ignored by router",
+        "got": "IGNORED",
+        "reason": "not_http",
+        "prob": null,
+        "pass": true
+      }
+    ],
+    "unseen_engine_sample": {
+      "model_only_suspicious": {
+        "precision": 0.9786,
+        "recall": 0.3168,
+        "fpr": 0.0036,
+        "n": 40000
+      },
+      "model_only_dangerous": {
+        "precision": 0.997,
+        "recall": 0.1469,
+        "fpr": 0.0002,
+        "n": 40000
+      },
+      "engine_suspicious": {
+        "precision": 0.9748,
+        "recall": 0.354,
+        "fpr": 0.0047,
+        "n": 40000
+      },
+      "engine_dangerous": {
+        "precision": 0.9883,
+        "recall": 0.2218,
+        "fpr": 0.0014,
+        "n": 40000
+      }
+    }
+  }
+}

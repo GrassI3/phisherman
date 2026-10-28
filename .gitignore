@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+ml/data/*
+!ml/data/.gitkeep
+
+# Private test links (may resemble real brands; keep out of the public repo)
+ml/test_links.txt
+
+# Android / Gradle
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.iml
+*.apk
+*.aab
+*.keystore
+
+# OS
+.DS_Store
+Thumbs.db

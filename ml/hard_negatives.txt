@@ -1,0 +1,45 @@
+# Hard negatives: benign URLs on real, official sites that look risky to a lexical model (login
+# pages, long paths and queries, Indian bank / government portals). Paths are representative and
+# are scored as text only. The last two are made-up subdomains of official bank domains (benign by
+# construction: only the bank controls them). Used to measure link FPR (PS4 11.2), scored
+# model-only (no allowlist) and through the full engine.
+https://retail.onlinesbi.sbi/retail/login.htm
+https://www.onlinesbi.sbi/
+https://netbanking.hdfcbank.com/netbanking/
+https://infinity.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI
+https://omni.axisbank.co.in/axisretailbanking/
+https://netbanking.kotak.com/knb2/
+https://www.irctc.co.in/nget/train-search
+https://eportal.incometax.gov.in/iec/foservices/#/login
+https://myaadhaar.uidai.gov.in/
+https://www.digilocker.gov.in/
+https://unifiedportal-mem.epfindia.gov.in/memberinterface/
+https://cybercrime.gov.in/Webform/Accept.aspx
+https://services.gst.gov.in/services/login
+https://parivahan.gov.in/rcdlstatus/?pur_cd=101
+https://www.npci.org.in/what-we-do/upi/product-overview
+https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&service=mail&flowName=GlifWebSignIn
+https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=4765445b-32c6-49b0-83e6-1d93765276ca&response_type=code&scope=openid
+https://www.amazon.in/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.in%2F
+https://www.flipkart.com/account/login?ret=/
+https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin
+https://github.com/login?return_to=%2Fsettings%2Fsecurity
+https://web.whatsapp.com/
+https://paytm.com/recharge
+https://www.phonepe.com/business-solutions/payment-gateway/
+https://pay.google.com/about/
+https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890&index=3
+https://www.google.com/maps/search/railway+station+near+connaught+place+new+delhi/@28.6315,77.2167,15z?entry=ttu
+https://docs.google.com/forms/d/e/1FAIpQLSf_example_form_id_1234567890/viewform?usp=sf_link
+https://kite.zerodha.com/connect/login?v=3&api_key=kitefront
+https://www.nseindia.com/get-quotes/equity?symbol=INFY
+https://www.moneycontrol.com/india/stockpricequote/computers-software/infosys/IT
+https://www.makemytrip.com/flights/
+https://in.bookmyshow.com/explore/home/mumbai
+https://www.hotstar.com/in/home
+https://www.zomato.com/ncr/restaurants
+https://www.swiggy.com/restaurants
+https://www.indiapost.gov.in/VAS/Pages/IndiaPostHome.aspx
+https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx?prid=57890
+https://update-kyc.sbi.co.in/
+https://secure.hdfcbank.com/login/verify

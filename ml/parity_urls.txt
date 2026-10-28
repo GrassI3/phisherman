@@ -1,0 +1,32 @@
+# 30 URLs for the Python vs Kotlin parity test (PS4 6.7). 10 safe, 10 phishing-like, 10 tricky.
+# Phishing-like hosts are made up and use .example / reserved IPs. One URL per line.
+https://www.wikipedia.org/
+https://en.wikipedia.org/wiki/Phishing
+https://www.hdfcbank.com/
+https://www.sbi.co.in/web/personal-banking
+https://www.irctc.co.in/nget/train-search
+https://github.com/login
+https://www.amazon.in/gp/your-account/order-history?ref_=ya_d_c_yo
+https://stackoverflow.com/questions/9444055/using-dns-to-redirect
+https://www.rmit.edu.au/
+https://docs.python.org/3/library/urllib.parse.html
+https://examplebank-kyc-update.example/login
+http://203.0.113.10/verify/account
+https://examplebank.com@login-check.example/
+https://login.secure.examplebank.com.attacker.example/
+https://paytrn.example/
+https://hdfc-netbanking-secure.example/update/kyc?id=99812
+http://sbi-reward-points.xyz/claim/otp
+https://icici-verify.top/account/suspend
+http://free-refund-incometax.icu/refund?pan=ABCDE1234F
+https://phonepe-cashback.click/bonus/reward
+https://bit.ly/example
+bank.example/login
+https://xn--pypal-4ve.com/
+http://[2001:db8::1]/login
+https://acaparis.godaddysites.com/
+https://sites.google.com/view/kyc-help
+https://example.com/%6Cogin?a=1&b=2&c=
+https://www.google.com/maps/search/railway+station+near+connaught+place/@28.6315,77.2167,15z?entry=ttu
+https://a0724127.xsph.ru/
+https://example.com/user@mail

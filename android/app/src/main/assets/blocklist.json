@@ -1,0 +1,12 @@
+{
+  "version": "block-1",
+  "source": "Phishing.Database phishing-domains-ACTIVE.txt (MIT)",
+  "built": "2026-10-28",
+  "entries": 392151,
+  "dropped": 11,
+  "m_bits": 5638192,
+  "k": 10,
+  "target_fp": 0.001,
+  "measured_fp": 0.00096,
+  "hash": "fnv1a64 double hashing, see ml/bloom.py"
+}
