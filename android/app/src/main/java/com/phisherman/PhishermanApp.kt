@@ -24,6 +24,7 @@ class PhishermanApp : Application() {
         if (MessageNotificationListener.isEnabled(this)) {
             NotificationListenerService.requestRebind(ComponentName(this, MessageNotificationListener::class.java))
         }
+        CallWatcher.restoreCaptions(this)  // captions are only ever on during a call
         CallWatcher.start(this)
         // load the models early so the first link tap or SMS is fast
         scope.launch {

@@ -2,8 +2,12 @@ package com.phisherman.engine
 
 import android.content.Context
 import android.util.Log
-import com.google.mediapipe.tasks.genai.llminference.LlmInference
-import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
+import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.Content
+import com.google.ai.edge.litertlm.ConversationConfig
+import com.google.ai.edge.litertlm.Engine
+import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.SamplerConfig
 import com.phisherman.voice.ContextJudge
 import com.phisherman.voice.Judgement
 import kotlinx.coroutines.Dispatchers
@@ -13,81 +17,86 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * The fine-tuned Gemma 3 270M scam checker, running on the phone through MediaPipe (offline).
- * A second opinion for chats and calls: callers only ever use it to RAISE a risk level.
- * Prompt format must match ml/llm_data.py exactly (it was trained on it).
+ * The fine-tuned Gemma 3 270M scam checker (.litertlm), run on the phone by LiteRT-LM, offline.
+ * A second opinion for chats, emails and calls: callers only ever use it to RAISE a risk level.
+ * The runtime adds the Gemma turn template from the model file; user prompt below must match
+ * user_prompt() in ml/llm_data.py exactly (it was trained on that text).
  */
 object ScamLlm : ContextJudge {
     private const val TAG = "ScamLlm"
-    private const val ASSET = "phisherman_scam.task"
+    private const val ASSET = "phisherman_scam.litertlm"
     private const val MAX_TEXT = 600
     private val ANSWER = Regex("(SAFE|SUSPICIOUS|SCAM)\\s*\\|\\s*([a-z_]+)")
     private val URL = Regex("(?i)(?:https?://|www\\.)\\S+|\\b[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.(?:com|in|net|org|co|ly|xyz|top|info|link|site|online|app|me|io|example|sbi)(?:/\\S*)?")
+    private val SPACES = Regex("[ \\t]+")
 
     private val mutex = Mutex()
-    @Volatile private var llm: LlmInference? = null
+    @Volatile private var engine: Engine? = null
     @Volatile var loadError: String? = null
         private set
     @Volatile var lastLatencyMs: Long = 0
         private set
 
-    fun available(ctx: Context): Boolean = llm != null || assetExists(ctx)
+    fun available(ctx: Context): Boolean = engine != null ||
+        runCatching { ctx.assets.openFd(ASSET).close(); true }.getOrDefault(false)
 
-    private fun assetExists(ctx: Context) = runCatching { ctx.assets.openFd(ASSET).close(); true }.getOrDefault(false)
-
-    /** Copies the model out of the APK once (MediaPipe needs a file path) and loads it. */
+    /** Copies the model out of the APK once (the runtime needs a file path) and loads it. */
     suspend fun init(ctx: Context): Boolean = mutex.withLock {
-        if (llm != null) return@withLock true
+        if (engine != null) return@withLock true
         if (loadError != null) return@withLock false
         withContext(Dispatchers.IO) {
             try {
+                val t0 = System.nanoTime()
                 val file = File(ctx.filesDir, ASSET)
                 val size = ctx.assets.openFd(ASSET).use { it.length }
                 if (!file.exists() || file.length() != size) {
                     ctx.assets.open(ASSET).use { input -> file.outputStream().use { input.copyTo(it, 1 shl 20) } }
                 }
-                val opts = LlmInference.LlmInferenceOptions.builder()
-                    .setModelPath(file.absolutePath)
-                    .setMaxTokens(512)
-                    .build()
-                llm = LlmInference.createFromOptions(ctx, opts)
-                Log.i(TAG, "loaded (${file.length() / 1_000_000} MB)")
+                val e = Engine(EngineConfig(modelPath = file.absolutePath, backend = Backend.CPU(), maxNumTokens = 512,
+                    cacheDir = ctx.cacheDir.absolutePath))
+                e.initialize()
+                engine = e
+                Log.i(TAG, "loaded ${file.length() / 1_000_000} MB in ${(System.nanoTime() - t0) / 1_000_000} ms")
                 true
-            } catch (e: Throwable) {
-                loadError = "${e.javaClass.simpleName}: ${e.message}"
+            } catch (t: Throwable) {
+                loadError = "${t.javaClass.simpleName}: ${t.message}"
                 Log.w(TAG, "on-device LLM not available: $loadError")
                 false
             }
         }
     }
 
-    fun prompt(source: String, sender: String, text: String): String {
-        val body = URL.replace(text.replace(" || ", "\n"), " ").replace(Regex("[ \\t]+"), " ").trim().take(MAX_TEXT)
-        return "<start_of_turn>user\nScam check. Source: ${source.ifBlank { "unknown" }}. From: ${sender.ifBlank { "unknown" }}.\n" +
-            "$body\nReply: LABEL | reason<end_of_turn>\n<start_of_turn>model\n"
+    /** Same text as user_prompt() in ml/llm_data.py. */
+    fun userPrompt(source: String, sender: String, text: String): String {
+        val body = URL.replace(text.replace(" || ", "\n"), " ").replace(SPACES, " ").trim().take(MAX_TEXT)
+        return "Scam check. Source: ${source.ifEmpty { "unknown" }}. From: ${sender.ifEmpty { "unknown" }}.\n$body\nReply: LABEL | reason"
     }
 
     /** Returns null when the model is not loaded or its answer cannot be parsed. */
     override suspend fun judge(source: String, sender: String, text: String): Judgement? {
-        val engine = llm ?: return null
+        val e = engine ?: return null
         return mutex.withLock {
             withContext(Dispatchers.Default) {
                 val t0 = System.nanoTime()
-                val session = LlmInferenceSession.createFromOptions(engine,
-                    LlmInferenceSession.LlmInferenceSessionOptions.builder().setTopK(1).setTemperature(0f).build())
                 try {
-                    session.addQueryChunk(prompt(source, sender, text))
-                    val out = session.generateResponse()
-                    lastLatencyMs = (System.nanoTime() - t0) / 1_000_000
-                    val m = ANSWER.find(out) ?: return@withContext null.also { Log.d(TAG, "unparsed: $out") }
-                    val level = when (m.groupValues[1]) { "SCAM" -> Level.DANGEROUS; "SUSPICIOUS" -> Level.SUSPICIOUS; else -> Level.SAFE }
-                    Log.d(TAG, "${m.value} in ${lastLatencyMs} ms")
-                    Judgement(level, m.groupValues[2])
-                } catch (e: Throwable) {
-                    Log.w(TAG, "inference failed", e)
+                    // a fresh conversation per check: nothing carries over between messages
+                    e.createConversation(ConversationConfig(samplerConfig = SamplerConfig(1, 1.0, 0.0, 0))).use { conv ->
+                        val reply = conv.sendMessage(userPrompt(source, sender, text))
+                        val out = reply.contents.contents.filterIsInstance<Content.Text>().joinToString("") { it.text }
+                        lastLatencyMs = (System.nanoTime() - t0) / 1_000_000
+                        val m = ANSWER.find(out)
+                        if (m == null) {
+                            Log.d(TAG, "unparsed answer: $out")
+                            null
+                        } else {
+                            Log.d(TAG, "${m.value} in $lastLatencyMs ms")
+                            val level = when (m.groupValues[1]) { "SCAM" -> Level.DANGEROUS; "SUSPICIOUS" -> Level.SUSPICIOUS; else -> Level.SAFE }
+                            Judgement(level, m.groupValues[2])
+                        }
+                    }
+                } catch (t: Throwable) {
+                    Log.w(TAG, "inference failed", t)
                     null
-                } finally {
-                    session.close()
                 }
             }
         }

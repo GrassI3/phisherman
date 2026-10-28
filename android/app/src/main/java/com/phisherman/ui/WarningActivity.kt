@@ -25,7 +25,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -77,10 +76,6 @@ class WarningActivity : ComponentActivity() {
                 url = url, body = body, verdict = verdict, hindi = hindi,
                 onToggleLanguage = { hindi = !hindi; Prefs.setHindi(this, hindi) },
                 onGoBack = { act("BACK"); finish() },
-                onReport = {
-                    act("REPORTED")
-                    Toast.makeText(this, "Report screen arrives in Phase 5", Toast.LENGTH_SHORT).show()
-                },
                 onOpenAnyway = {
                     act("OPEN_ANYWAY")
                     LinkAnalyser.markOpenedAnyway(url)
@@ -144,7 +139,6 @@ private fun WarningScreen(
     hindi: Boolean,
     onToggleLanguage: () -> Unit,
     onGoBack: () -> Unit,
-    onReport: () -> Unit,
     onOpenAnyway: () -> Unit,
 ) {
     val dangerous = verdict.level == Level.DANGEROUS
@@ -225,10 +219,6 @@ private fun WarningScreen(
             Text(t("Do not click links in it, call back, or share OTP, PIN or card details.",
                 "इसके लिंक पर क्लिक न करें, वापस कॉल न करें, और OTP, PIN या कार्ड की जानकारी न दें।"),
                 color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
-        }
-        OutlinedButton(onClick = onReport, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp)) {
-            Text(if (isSms) t("Report this message", "इस संदेश की शिकायत करें") else t("Report this link", "इस लिंक की शिकायत करें"),
-                color = Color.White, fontSize = 16.sp)
         }
         if (!isSms) {
             TextButton(onClick = { confirm = true }, modifier = Modifier.align(Alignment.CenterHorizontally)) {

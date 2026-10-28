@@ -46,7 +46,7 @@ Not used, for the record: Spam SMS in Hindi (IEEE DataPort; licence unclear, nee
 | Voice scripts | About 12 scam-call scripts and 12 normal-call scripts, recorded in our own voices | Voice detection rate, time to amber / red, false alarms | To create (Phase 4) |
 | `brands.json` | Brand tokens, official registrable domains, homoglyph map | URL features 16–17 and SMS rule R_BRAND_LINK | Done; every official domain still needs manual verification |
 | `voice_rules.json` | Phrase categories and weights in English / Hindi / Hinglish (credential, remote access, payment, authority, threat, lure, secrecy) and two combination bonuses | Voice scorer | Done |
-| `voice_scripts.tsv` | 16 scripted calls: 9 scam (PS4 V1 plus digital arrest, CVV reward, electricity, customs, Paytm, TRAI), 5 normal, 2 customer-care; `[PAY]` marks the payment demand | Voice tests and in-app demo scripts | Done |
+| `voice_scripts.tsv` | 18 scripted calls: 7 scam (PS4 V1 plus digital arrest, CVV reward, electricity, customs, Paytm, TRAI), 6 normal, 5 customer-care / genuine bank (G1–G3 mention OTPs without asking for them); `[PAY]` marks the payment demand | Voice tests and in-app demo scripts | Done |
 | `ml/llm_scenarios.tsv` | 58 hand-written cases for the LLM: no-link scams (family impersonation, fake CEO, OLX QR), multi-message chats, call transcripts, and tricky genuine ones (bank credit alerts, office payments, family money requests). All synthetic | On-device LLM training / test | Done |
 
 ### Known leakage: URL-Phish
@@ -156,6 +156,43 @@ Rebuild: `cd ml && python train_sms.py` (writes `sms_model.json`, `thresholds.js
 - `SmsParityTest` (JVM): normaliser text and extracted links identical to Python, probability within 1e-6, same level and rule hits on 52 messages (all Indian test messages plus edge cases).
 - On the phone, the PS4 §13.3 messages S1–S7 were fed through the real receiver pipeline (debug-only `DebugSmsReceiver`, because a real SMS cannot be injected over adb): S1, S4, S6, S7 raised a scam notification with the right reason; S2 (OTP delivery), S3 (debit alert) and S5 (promo) stayed silent.
 
+## Call guard on real calls (Phase 4)
+
+Android gives third-party apps silence from the microphone during a phone call (measured on the S21 FE: MIC and VOICE_COMMUNICATION both -100 dBFS during a live call; the same code hears normally outside calls). Being the default dialer or using Shizuku does not change that: the caller's audio needs `CAPTURE_AUDIO_OUTPUT`, which only system apps hold.
+
+What works, with the phone at the ear and no speakerphone: the system **Live Caption** feature transcribes the caller. Phisherman's accessibility service reads the caption box during a call and feeds the call guard (same phrase scoring, on-device AI every ~10 s, strong vibration plus an earpiece beep, red banner). With `WRITE_SECURE_SETTINGS` granted once over adb, Phisherman switches Live Caption on when a call connects and off when it ends.
+
+Live test (2026-10-29, normal call at the ear): the caller asked for an OTP; captions reached Phisherman, the on-device AI answered `SCAM | credential_request` in 837 ms, and the guard went red with vibration. A bug kept the phone vibrating after the call (the alert was started and stopped through two different `Vibrator` objects, so `cancel()` did not match); fixed by using one shared `Vibrator`.
+
+Second live test: **every call was flagged**, even a call about a picnic. Live Caption shows its own placeholder, "[Call started. Captions will appear here.] English", before anyone speaks; Phisherman passed that to the on-device AI, which had never seen such text and answered `SCAM | other_scam`. Fixes: the caption reader drops Live Caption's UI text; the AI is asked only after 8+ words of real speech; its vague `other_scam` answer is ignored on calls; and on a call the AI alone can reach at most amber; red needs the phrase rules to have heard warning signs too (`VoiceScorerTest.aiAloneNeverMakesACallRed`).
+
+## Prevention (Phase 5) and results (Phase 6)
+
+**Prevention.** Friction at the risky moment: on a link warning, **Go back** is the large default and **Open anyway** needs a second confirmation with an OTP / PIN reminder; scam calls get strong vibration plus an earpiece beep; risky messages get a red banner over the current app. If a warning happened in the last 15 minutes, the home screen reminds the user to call their bank if they already entered details. The PDF's "report this" screen (portal + 1930 dialler) was dropped by team decision.
+
+**Results screen** (home → Open results) reads `assets/results.json`, written by `ml/eval_report.py`: precision, recall (fraud detection rate), FPR and N per channel and test set; a link-threshold slider over the held-out precision / recall curve; voice-script results; and latency measured on the phone from the decision log (median and 95th percentile per channel).
+
+Email reading was tightened after a live false alarm: an email is read only when it is fully open (exactly one subject on screen and a Reply button), never from the inbox list; and when the SMS word model is the only signal on an email, the on-device AI decides (SAFE clears it).
+
+## On-device AI second opinion (fine-tuned Gemma 3 270M)
+
+Word rules miss scams with no link and no trigger words ("Hi mom, new number, send money", fake CEO, slow-burn investment chats). A small LLM, fine-tuned for one job and run fully offline on the phone, reads the message, the recent chat, an open email or the call transcript and answers `LABEL | reason` (SAFE / SUSPICIOUS / SCAM + a reason code).
+
+- **Guardrails:** it can only **raise** a level, never lower it; it is skipped for trusted senders (bank headers, verified names in SMS apps) and when the rules already said DANGEROUS; links are removed from its input (the link engine judges links); its answer is forced into a fixed format.
+- **Pipeline:** `ml/llm_data.py` (data + prompt format) → `ml/train_llm.py` (LoRA r=16 on the laptop GPU, ~10 min on an RTX 3050; loss on answer tokens only, because Gemma's 262k vocabulary does not fit full-sequence logits in 6 GB) → `ml/convert_llm.sh` (WSL, litert-torch, int8) → `ml/bundle_llm.sh` (LiteRT-LM `.litertlm` with the Gemma turn template) → `ml/test_litertlm.py` (runs the converted file on the laptop) → app asset `phisherman_scam.litertlm` (284 MB, not committed) → `engine/ScamLlm.kt` (`litertlm-android`).
+- **Data:** 4,633 examples: UCI SMS, our Indian SMS, 58 hand-written no-link / chat / call scenarios, three Hugging Face datasets, and 60 templated genuine OTP / bank alerts.
+
+| Held-out test set | v1 (P / R / FPR) | v2 | **v3 (shipped)** |
+|---|---|---|---|
+| All | 0.95 / 0.95 / 2.9% (N=431) | 0.98 / 0.98 / 2.0% (N=959) | **0.98 / 0.98 / 1.4%** (N=977) |
+| Indian SMS (ours) | 0.82 / 1.00 / 13% | 0.75 / 1.00 / 20% | **0.94 / 0.94 / 3.3%** |
+| No-link / chat / call scenarios | 0.90 / 0.82 / 14% | 0.91 / 0.91 / 14% | 0.91 / 0.91 / 14% (N=18, small) |
+| Genuine OTP / bank alerts | — | — | 0 false alarms / 18 |
+
+The untuned base model scored 0 on every set (it could not follow the answer format). v2 → v3: links removed from the model input and genuine OTP alerts added, which cut Indian false alarms from 20% to 3.3%. The 1.00 scores on the Hugging Face sets are not trustworthy (templated / machine-generated). Known misses: a slow-burn crypto "teacher" chat; a debit-alert scam whose only signal was its link (caught by the link engine in the app).
+
+On the phone (S21 FE, CPU): about **0.9–1.1 s per check**. The converted file was checked on the laptop first: prompt template identical to training, 5 / 6 smoke-test cases correct.
+
 ## External dependencies
 
 ### Toolchain
@@ -186,6 +223,7 @@ Rebuild: `cd ml && python train_sms.py` (writes `sms_model.json`, `thresholds.js
 | `androidx.room:room-runtime` / `room-ktx` / `room-compiler` | 2.8.5 | Local decision log |
 | `com.microsoft.onnxruntime:onnxruntime-android` | 1.31.1 | Runs `link_model.onnx` on device |
 | `org.jetbrains.kotlinx:kotlinx-serialization-json` | 1.12.0 | Loads JSON assets (SMS model, thresholds, rules, results) |
+| `com.google.ai.edge.litertlm:litertlm-android` | 0.18.1 | Runs the fine-tuned Gemma 3 270M (`.litertlm`) on the phone |
 | `junit:junit` | 4.13.2 | Kotlin unit and parity tests |
 | `com.alphacephei:vosk-android` | not added | Optional offline speech fallback (Phase 4, only if on-device recognition is poor) |
 
@@ -203,6 +241,9 @@ Rebuild: `cd ml && python train_sms.py` (writes `sms_model.json`, `thresholds.js
 | matplotlib | 3.11.2 | PR curve and confusion matrix plots |
 | jupyter / notebook | 7.6.3 | Exploration notebooks |
 | pyarrow | 26.0.0 | Reading the pirocheto Parquet files |
+| torch | 2.11.0+cu128 | LLM fine-tuning on the laptop GPU |
+| transformers / peft | 5.21.0 / 0.21.2 | Gemma 3 270M loading and LoRA |
+| litert-torch, litert-lm, tensorflow-cpu (WSL Ubuntu, Python 3.12 via uv) | 0.10.0 / 0.18.1 / latest | Convert the fine-tuned model to int8 `.litertlm` and test it on the laptop (`ml/convert_llm.sh`, `ml/bundle_llm.sh`, `ml/test_litertlm.py`) |
 
 ### Platform services and external endpoints
 

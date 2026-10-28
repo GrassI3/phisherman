@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- SMS analysis: read incoming messages as they arrive (no READ_SMS: we never read the inbox) -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -15,6 +16,10 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- automatic call guard: call state only (ringing / in call / idle), never the number -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- optional, granted once over adb (pm grant): lets Phisherman switch Live Caption on for the
+         length of a call, so the caller's words can be read without speakerphone -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <!-- package visibility: find the real browsers to forward safe links to -->
     <queries>
@@ -101,6 +106,10 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/chat_reader" />
         </service>
+
+        <activity
+            android:name=".ui.MetricsActivity"
+            android:exported="false" />
 
         <activity
             android:name=".voice.CallGuardActivity"

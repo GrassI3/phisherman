@@ -74,7 +74,10 @@ object SmsHandler {
      * lower it. Skipped for trusted senders (bank headers, saved / verified names in SMS apps)
      * and when the rules already said DANGEROUS.
      */
+    private val EMAIL_APPS = setOf("Gmail", "Outlook", "Samsung Email")
+
     private suspend fun secondOpinion(v: Verdict, sender: String, body: String, context: String?, sourceApp: String?, trusted: Boolean): Verdict {
+        if (sourceApp in EMAIL_APPS && v.level != Level.SAFE && v.ruleHits == listOf("model")) return emailModelOnly(v, sender, body, context, sourceApp!!)
         if (v.level == Level.DANGEROUS || trusted || HEADER.matches(sender.trim()) || "R_ALLOW_SENDER" in v.ruleHits) return v
         val j = ScamLlm.judge(sourceApp ?: "SMS", sender, context ?: body) ?: return v
         if (j.level <= v.level) return v
@@ -83,6 +86,27 @@ object SmsHandler {
         return v.copy(level = j.level, score = maxOf(v.score, if (j.level == Level.DANGEROUS) 90 else 60),
             reasons = (listOf(Reason("llm_${j.reason}", en, hi)) + v.reasons).take(3),
             ruleHits = v.ruleHits + "llm:${j.reason}")
+    }
+
+    /**
+     * The SMS word model was trained on texts and over-reacts to email newsletters (a Lenovo
+     * support update was flagged on wording alone). When it is the ONLY signal on an email, the
+     * on-device AI decides: SAFE clears it, SCAM / SUSPICIOUS keeps it. Without the AI it is
+     * capped at amber. Any rule hit (OTP ask, brand-link mismatch, risky link) is not affected.
+     */
+    private suspend fun emailModelOnly(v: Verdict, sender: String, body: String, context: String?, sourceApp: String): Verdict {
+        val j = ScamLlm.judge(sourceApp, sender, context ?: body)
+        Log.d(TAG, "email flagged by wording only; on-device AI says ${j?.level ?: "unavailable"}")
+        return when {
+            j == null -> v.copy(level = Level.SUSPICIOUS, score = minOf(v.score, 60))
+            j.level == Level.SAFE -> v.copy(level = Level.SAFE, score = minOf(v.score, 30), reasons = emptyList(),
+                ruleHits = v.ruleHits + "llm:cleared")
+            else -> {
+                val (en, hi) = ScamLlm.reasonText(j.reason)
+                v.copy(level = j.level, reasons = (listOf(Reason("llm_${j.reason}", en, hi)) + v.reasons).take(3),
+                    ruleHits = v.ruleHits + "llm:${j.reason}")
+            }
+        }
     }
 
     /**

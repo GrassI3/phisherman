@@ -39,6 +39,7 @@ data class GuardState(
 /** Live state of the call guard, shared by the service (mic), the demo-script player and the UI. */
 object CallGuard {
     private const val LLM_EVERY_MS = 10_000L
+    private const val LLM_MIN_WORDS = 8
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val _state = MutableStateFlow(GuardState())
     val state: StateFlow<GuardState> = _state
@@ -137,16 +138,27 @@ object CallGuard {
         val j = judge ?: return
         val now = System.currentTimeMillis()
         if (now - lastLlmAt < LLM_EVERY_MS || llmJob?.isActive == true) return
-        lastLlmAt = now
         val text = s.windowText()
+        if (text.split(Regex("\\s+")).count { it.isNotBlank() } < LLM_MIN_WORDS) return  // wait for real speech
+        lastLlmAt = now
         llmJob = scope.launch {
             val verdict = runCatching { j.judge("Call", "Unknown caller", text) }.getOrNull() ?: return@launch
             synchronized(this@CallGuard) {
                 if (session !== s) return@launch
-                s.applyJudgement(verdict)
+                s.applyJudgement(forCall(verdict))
                 publish(ctx, s, _state.value.partial)
             }
         }
+    }
+
+    /**
+     * A red call alert vibrates hard in the user's ear, so the AI alone may only reach amber; red
+     * needs the phrase rules too (CallSession lets the AI lift a SUSPICIOUS rule score to red).
+     * The catch-all "other_scam" answer is too vague to act on during a call.
+     */
+    private fun forCall(j: Judgement): Judgement = when {
+        j.reason == "other_scam" -> Judgement(Level.SAFE, j.reason)
+        else -> j
     }
 
     fun acknowledge(ctx: Context) {

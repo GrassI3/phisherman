@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Phisherman</string>
-    <string name="chat_reader_description">Checks incoming messages in the chat you have open (WhatsApp, Instagram, Telegram, Messages, Samsung Messages, Messenger) for scams. During a phone call it also reads the Live Caption box, so the call guard can warn you about scam calls. Only these apps are read. Text is checked on this phone and never stored or uploaded.</string>
+    <string name="chat_reader_description">Checks incoming messages in the chat you have open (WhatsApp, Instagram, Telegram, Messages, Samsung Messages, Messenger) and the email you open (Gmail, Outlook, Samsung Email) for scams. During a phone call it also reads the Live Caption box, so the call guard can warn you about scam calls. Only these apps are read. Text is checked on this phone and never stored or uploaded.</string>
 </resources>

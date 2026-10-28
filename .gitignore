@@ -24,3 +24,7 @@ android/captures/
 # OS
 .DS_Store
 Thumbs.db
+
+# On-device LLM (284 MB): rebuilt by ml/train_llm.py + ml/convert_llm.sh + ml/bundle_llm.sh
+ml/llm/
+android/app/src/main/assets/*.litertlm

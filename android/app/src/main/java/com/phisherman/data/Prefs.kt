@@ -12,6 +12,10 @@ object Prefs {
     fun chosenBrowser(ctx: Context): String? = sp(ctx).getString(KEY_BROWSER, null)
     fun setChosenBrowser(ctx: Context, pkg: String) = sp(ctx).edit().putString(KEY_BROWSER, pkg).apply()
 
+    /** Phisherman switched Live Caption on for a call and has not switched it back off yet. */
+    fun captionsOnByUs(ctx: Context): Boolean = sp(ctx).getBoolean("captions_on_by_us", false)
+    fun setCaptionsOnByUs(ctx: Context, on: Boolean) = sp(ctx).edit().putBoolean("captions_on_by_us", on).commit()
+
     fun autoCallGuard(ctx: Context): Boolean = sp(ctx).getBoolean("auto_call_guard", false)
     fun setAutoCallGuard(ctx: Context, on: Boolean) = sp(ctx).edit().putBoolean("auto_call_guard", on).apply()
 

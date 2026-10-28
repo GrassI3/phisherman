@@ -53,6 +53,20 @@ class VoiceScorerTest {
         assertTrue(bad.joinToString("\n"), bad.isEmpty())
     }
 
+    /** Genuine bank calls (G1-G3) mention OTPs and cards but never ASK for them: no alert at all. */
+    @Test
+    fun genuineBankCallsStaySafe() {
+        val bad = scripts.filter { it.id.startsWith("G") }.mapNotNull { s ->
+            val levels = play(s)
+            if (levels.any { it != Level.SAFE }) "${s.id}: $levels" else null
+        }
+        assertEquals(3, scripts.count { it.id.startsWith("G") })
+        assertTrue(bad.joinToString("\n"), bad.isEmpty())
+        val sc = VoiceScorer(rules)
+        assertTrue("credential" !in sc.score("you will receive an OTP, enter it only in the app").categories)
+        assertTrue("credential" in sc.score("you will receive an OTP, tell me the OTP").categories)
+    }
+
     @Test
     fun negatedCredentialIsNotARequest() {
         val sc = VoiceScorer(rules)
@@ -77,5 +91,25 @@ class VoiceScorerTest {
         assertEquals(Level.SUSPICIOUS, s2.update().level)
         s2.applyJudgement(Judgement(Level.SAFE, "none"))  // cannot lower
         assertEquals(Level.SUSPICIOUS, s2.update().level)
+    }
+
+    /** A picnic call must never go red just because the AI said SCAM. */
+    @Test
+    fun aiAloneNeverMakesACallRed() {
+        var t = 0L
+        val s = CallSession(rules) { t }
+        s.addFinal("hey are you coming to the picnic on sunday, bring the sandwiches")
+        s.applyJudgement(Judgement(Level.DANGEROUS, "other_scam"))
+        assertEquals(Level.SUSPICIOUS, s.update().level)
+
+        // with real warning signs from the rules, the AI can lift amber to red
+        val s2 = CallSession(rules) { t }
+        s2.addFinal("I am calling from the bank head office, please tell me the OTP")
+        assertEquals(Level.DANGEROUS, s2.update().level)  // rules alone: authority + credential + combo
+        val s3 = CallSession(rules) { t }
+        s3.addFinal("please tell me the OTP you got")
+        assertEquals(Level.SUSPICIOUS, s3.update().level)
+        s3.applyJudgement(Judgement(Level.DANGEROUS, "credential_request"))
+        assertEquals(Level.DANGEROUS, s3.update().level)
     }
 }

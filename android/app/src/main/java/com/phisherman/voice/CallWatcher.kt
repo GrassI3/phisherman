@@ -35,8 +35,17 @@ object CallWatcher {
             override fun onCallStateChanged(state: Int) {
                 Log.d(TAG, "call state $state")
                 when (state) {
-                    TelephonyManager.CALL_STATE_OFFHOOK -> if (!inCall) { inCall = true; startGuard(app) }
-                    TelephonyManager.CALL_STATE_IDLE -> if (inCall) { inCall = false; stopGuard(app) }
+                    TelephonyManager.CALL_STATE_OFFHOOK -> if (!inCall) {
+                        inCall = true
+                        captionsOnForCall(app)
+                        startGuard(app)
+                    }
+                    TelephonyManager.CALL_STATE_IDLE -> if (inCall) {
+                        inCall = false
+                        stopGuard(app)
+                        CallAlerts.stop(app)  // whatever raised the alert, hanging up ends it
+                        captionsOffAfterCall(app)
+                    }
                 }
             }
         }
@@ -53,6 +62,41 @@ object CallWatcher {
         val cb = registered as? TelephonyCallback ?: return
         ctx.applicationContext.getSystemService(TelephonyManager::class.java).unregisterTelephonyCallback(cb)
         registered = null
+    }
+
+    private const val CAPTIONS = "odi_captions_enabled"
+
+    private fun canWriteSecure(ctx: Context) =
+        ContextCompat.checkSelfPermission(ctx, Manifest.permission.WRITE_SECURE_SETTINGS) == PackageManager.PERMISSION_GRANTED
+
+    /**
+     * With WRITE_SECURE_SETTINGS (granted once over adb), switch Live Caption on just for the call.
+     * "We turned it on" is saved, not kept in memory, so captions are switched back off even if
+     * the app was killed during the call (see restoreCaptions).
+     */
+    private fun captionsOnForCall(ctx: Context) {
+        if (!canWriteSecure(ctx) || liveCaptionOn(ctx)) return
+        try {
+            android.provider.Settings.Secure.putInt(ctx.contentResolver, CAPTIONS, 1)
+            Prefs.setCaptionsOnByUs(ctx, true)
+            Log.i(TAG, "Live Caption switched on for this call")
+        } catch (e: SecurityException) {
+            Log.w(TAG, "cannot switch Live Caption on", e)
+        }
+    }
+
+    private fun captionsOffAfterCall(ctx: Context) {
+        if (!Prefs.captionsOnByUs(ctx)) return
+        runCatching { android.provider.Settings.Secure.putInt(ctx.contentResolver, CAPTIONS, 0) }
+        Prefs.setCaptionsOnByUs(ctx, false)
+        Log.i(TAG, "Live Caption switched back off")
+    }
+
+    /** On app start: if Phisherman left captions on (app killed mid-call) and no call is active, undo it. */
+    fun restoreCaptions(ctx: Context) {
+        val tm = ctx.getSystemService(TelephonyManager::class.java)
+        val idle = runCatching { tm.callStateForSubscription == TelephonyManager.CALL_STATE_IDLE }.getOrDefault(true)
+        if (idle) captionsOffAfterCall(ctx)
     }
 
     /** Live Caption on: Android's own captioning can hear calls, so read its box instead of the mic. */

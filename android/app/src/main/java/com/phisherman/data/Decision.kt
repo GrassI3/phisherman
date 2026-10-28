@@ -27,7 +27,7 @@ data class Decision(
     val subject: String,      // host for links, sender for SMS, "call" for voice
     val reasons: String,      // comma-joined reason ids
     val latencyMs: Long,
-    val userAction: String?,  // BACK | OPEN_ANYWAY | REPORTED | FORWARDED | null
+    val userAction: String?,  // BACK | OPEN_ANYWAY | FORWARDED | null
 )
 
 @Dao
@@ -43,7 +43,13 @@ interface DecisionDao {
 
     @Query("DELETE FROM decisions")
     suspend fun clear()
+
+    /** Measured on this phone, for the Results screen (latency per channel). */
+    @Query("SELECT channel, latencyMs FROM decisions WHERE latencyMs > 0")
+    suspend fun latencies(): List<LatencyRow>
 }
+
+data class LatencyRow(val channel: String, val latencyMs: Long)
 
 @Database(entities = [Decision::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {

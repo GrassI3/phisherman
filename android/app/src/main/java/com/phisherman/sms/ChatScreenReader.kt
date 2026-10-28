@@ -44,10 +44,20 @@ class ChatScreenReader : AccessibilityService() {
     /** Called for any risky message (open chat, notification or SMS) while this service runs. */
     fun showBanner(body: String, v: com.phisherman.engine.Verdict) { banner?.show(body, v) }
 
+    private val pendingEmail = Runnable { scanEmail() }
+    private val emailsDone = object : LinkedHashMap<Int, Boolean>(64, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, Boolean>?) = size > 300
+    }
+
     override fun onAccessibilityEvent(e: AccessibilityEvent) {
         val pkg = e.packageName?.toString()
         if (pkg == CAPTION_PKG || (e.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED && CallWatcher.inCall)) {
             if (CallWatcher.inCall) readCaptions()
+            return
+        }
+        if (pkg in EMAIL_APPS) {
+            main.removeCallbacks(pendingEmail)
+            main.postDelayed(pendingEmail, 1200)  // the body (often a WebView) loads after the header
             return
         }
         if (pkg !in CHAT_APPS) return
@@ -99,6 +109,31 @@ class ChatScreenReader : AccessibilityService() {
     }
 
     /**
+     * An OPEN email (Gmail, Outlook, Samsung Email): sender + subject + body, checked once.
+     * Only a fully opened email counts: exactly one subject on screen AND a Reply button. The
+     * inbox list (one subject per row, no Reply button) is never read.
+     */
+    private fun scanEmail() {
+        val root = rootInActiveWindow ?: return
+        val pkg = root.packageName?.toString() ?: return
+        val app = EMAIL_APPS[pkg] ?: return
+        val all = mutableListOf<Triple<Rect, String, String?>>()
+        collect(root, all)
+        val subjects = all.filter { it.third?.lowercase()?.contains("subject") == true }
+        if (subjects.size != 1 || !hasReplyButton(root)) return  // inbox list or still loading
+        val subjectNode = subjects.single()
+        val subject = subjectNode.second.removeSuffix("Inbox").trim()
+        val sender = all.firstOrNull { val id = it.third?.lowercase() ?: ""; "sender" in id || id.endsWith("from") }?.second ?: "Email"
+        val body = all.filter { it.first.top >= subjectNode.first.bottom && it.second.length >= 3 && it.second !in EMAIL_CHROME }
+            .sortedBy { it.first.top }.joinToString("\n") { it.second }.take(3000)
+        if (body.length < 40) return  // body not loaded yet; the next event will retry
+        val key = (pkg + "\u0000" + sender + "\u0000" + subject).hashCode()
+        if (emailsDone.put(key, true) != null) return
+        if (isDebuggable()) Log.d(TAG, "checking open email in $app: \"${subject.take(40)}\" (${body.length} chars)")
+        SmsHandler.handle(this, sender, "$subject\n$body", null, app, recordSafe = false, context = "Subject: $subject || $body")
+    }
+
+    /**
      * During a call, Android gives other apps silence from the microphone, but the system Live
      * Caption feature can transcribe the call. Read its caption box and feed the call guard.
      */
@@ -106,10 +141,25 @@ class ChatScreenReader : AccessibilityService() {
         val box = windows.firstOrNull { it.root?.packageName?.toString() == CAPTION_PKG }?.root ?: return
         val parts = mutableListOf<Triple<Rect, String, String?>>()
         collect(box, parts)
-        val text = parts.sortedBy { it.first.top }.joinToString(" ") { it.second }.trim()
+        // only the caller's words: drop the box's own UI ("[Call started. Captions will appear
+        // here.]", the language label, ellipses), which once made every call look like a scam
+        val text = parts.sortedBy { it.first.top }.map { it.second }
+            .filter { it.trim().lowercase() !in CAPTION_UI_LABELS }
+            .joinToString(" ")
+            .replace(CAPTION_BRACKETS, " ").replace("…", " ")
+            .replace(Regex("\\s+"), " ").trim()
         if (text.isEmpty()) return
         if (isDebuggable()) Log.d(TAG, "caption: \"${text.takeLast(50)}\"")
         CallGuard.onCaption(this, text)
+    }
+
+    /** An opened email shows a Reply button (text or icon description); the inbox list does not. */
+    private fun hasReplyButton(n: AccessibilityNodeInfo?): Boolean {
+        if (n == null) return false
+        val label = (n.contentDescription ?: n.text)?.toString()?.trim()?.lowercase()
+        if (label != null && label in REPLY_LABELS) return true
+        for (i in 0 until n.childCount) if (hasReplyButton(n.getChild(i))) return true
+        return false
     }
 
     private fun isDebuggable() = applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0
@@ -132,6 +182,9 @@ class ChatScreenReader : AccessibilityService() {
 
         /** Android System Intelligence hosts Live Caption */
         const val CAPTION_PKG = "com.google.android.as"
+        /** Live Caption's own messages are in square brackets, e.g. "[Call started. Captions will appear here.]" */
+        private val CAPTION_BRACKETS = Regex("\\[[^\\]]*\\]")
+        private val CAPTION_UI_LABELS = setOf("english", "hindi", "हिंदी", "live caption", "captions", "caption", "…", "...")
         private val TIME_RE = Regex("""(?i)\d{1,2}:\d{2}\s*(am|pm)?|today|yesterday|online|typing…?|last seen.*""")
 
         /** Chat apps whose open conversations are checked (same names as the notification listener). */
@@ -144,6 +197,18 @@ class ChatScreenReader : AccessibilityService() {
             "com.samsung.android.messaging" to "Samsung Messages",
             "com.facebook.orca" to "Messenger",
         )
+
+        /** Email apps whose OPEN email is checked. */
+        val EMAIL_APPS = mapOf(
+            "com.google.android.gm" to "Gmail",
+            "com.microsoft.office.outlook" to "Outlook",
+            "com.samsung.android.email.provider" to "Samsung Email",
+        )
+
+        private val REPLY_LABELS = setOf("reply", "reply all", "उत्तर दें", "जवाब दें")
+
+        /** Buttons and labels in email screens that are not part of the message. */
+        private val EMAIL_CHROME = setOf("Reply", "Reply all", "Forward", "Inbox", "Show quoted text", "Details", "to me", "Translate", "Unsubscribe")
 
         fun isEnabled(ctx: Context): Boolean {
             val list = Settings.Secure.getString(ctx.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: return false

@@ -56,21 +56,26 @@ class VoiceScorer(private val rules: VoiceRules) {
     }
 
     private fun matches(c: VoiceRules.Category, text: String): Boolean {
-        val negatable = c.id == "credential"
+        // OTP / PIN / CVV counts only when someone ASKS for it ("tell me the OTP", "OTP batao"),
+        // not when a genuine bank mentions it ("you'll get an OTP, enter it in the app") or warns
+        val credential = c.id == "credential"
+        fun counts(at: Int) = !credential || (!negated(text, at) && asked(text, at))
         for (rx in c.latin) {
-            for (m in rx.findAll(text)) {
-                if (!negatable || !negated(text, m.range.first)) return true
-            }
+            for (m in rx.findAll(text)) if (counts(m.range.first)) return true
         }
         for (p in c.devanagari) {
             var i = text.indexOf(p)
             while (i >= 0) {
-                if (!negatable || !negated(text, i)) return true
+                if (counts(i)) return true
                 i = text.indexOf(p, i + 1)
             }
         }
         return false
     }
+
+    /** An asking verb within a few words of the credential word. */
+    private fun asked(text: String, at: Int): Boolean =
+        ASK.containsMatchIn(text.substring(maxOf(0, at - 40), minOf(text.length, at + 45)))
 
     /** "never share your OTP", "OTP kisi ko mat batana": a warning, not a request. */
     private fun negated(text: String, at: Int): Boolean {
@@ -81,7 +86,10 @@ class VoiceScorer(private val rules: VoiceRules) {
 
     companion object {
         private val NEG_BEFORE = Regex("(?<![a-z])(never|don't|dont|do not|not to)(?![a-z])|मत|कभी")
-        private val NEG_AFTER = Regex("(?<![a-z])(mat|nahi|na) (batana|batao|bataiye|batayein|share|dena|dijiye)(?![a-z])|मत बताना|न बताएं")
+        private val ASK = Regex(
+            "(?<![a-z])(tell|say|share|give|send|read|confirm|forward|provide|need|want|batao|bataiye|bataye|bata|bolo|boliye|bol do|dijiye|de do|do na|bhejo|chahiye)(?![a-z])" +
+                "|बताओ|बताइए|बताइये|बोलिए|बोलो|दीजिए|भेजो|चाहिए")
+        private val NEG_AFTER =Regex("(?<![a-z])(mat|nahi|na) (batana|batao|bataiye|batayein|share|dena|dijiye)(?![a-z])|मत बताना|न बताएं")
 
         /** Lower-case, punctuation to spaces ("o.t.p" -> "o t p"), single spaces; Devanagari kept. */
         fun normalize(s: String): String {
@@ -139,7 +147,13 @@ class CallSession(private val rules: VoiceRules, private val now: () -> Long = S
         seen += s.categories
         maxScore = maxOf(maxScore, s.score)
         var level = s.level
-        llm?.let { if (it.level > level) level = it.level }
+        llm?.let { j ->
+            // the AI alone reaches at most amber; it can lift amber (rules already heard warning
+            // signs) to red, but a call with no rule signal never goes red on the AI's word
+            val cap = if (s.level >= Level.SUSPICIOUS) Level.DANGEROUS else Level.SUSPICIOUS
+            val ai = if (j.level > cap) cap else j.level
+            if (ai > level) level = ai
+        }
         if (level > latched) latched = level
         if (latched == Level.DANGEROUS) level = Level.DANGEROUS  // no flicker once red
         return s.copy(level = level)

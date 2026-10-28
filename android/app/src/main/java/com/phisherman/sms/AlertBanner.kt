@@ -6,12 +6,8 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -86,9 +82,5 @@ class AlertBanner(private val service: AccessibilityService) {
         view = null
     }
 
-    private fun vibrate() {
-        val vib = if (Build.VERSION.SDK_INT >= 31) service.getSystemService(VibratorManager::class.java).defaultVibrator
-        else @Suppress("DEPRECATION") service.getSystemService(Vibrator::class.java)
-        vib.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 400, 150, 400, 150, 400), -1))
-    }
+    private fun vibrate() = com.phisherman.voice.CallAlerts.pulse(service)
 }

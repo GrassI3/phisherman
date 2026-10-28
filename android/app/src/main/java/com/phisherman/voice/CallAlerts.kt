@@ -25,9 +25,20 @@ object CallAlerts {
     @Volatile var redActive = false
         private set
 
-    private fun vibrator(ctx: Context): Vibrator =
-        if (Build.VERSION.SDK_INT >= 31) ctx.getSystemService(VibratorManager::class.java).defaultVibrator
-        else @Suppress("DEPRECATION") ctx.getSystemService(Vibrator::class.java)
+    @Volatile private var shared: Vibrator? = null
+
+    /**
+     * One Vibrator for the whole app. Vibrator.cancel() only cancels vibrations started through the
+     * same Vibrator object, so starting from the accessibility service and stopping from the app
+     * with two different instances left the red alert vibrating forever.
+     */
+    private fun vibrator(ctx: Context): Vibrator = shared ?: synchronized(this) {
+        shared ?: run {
+            val app = ctx.applicationContext
+            if (Build.VERSION.SDK_INT >= 31) app.getSystemService(VibratorManager::class.java).defaultVibrator
+            else @Suppress("DEPRECATION") app.getSystemService(Vibrator::class.java)
+        }.also { shared = it }
+    }
 
     private fun vibrate(ctx: Context, effect: VibrationEffect) {
         val v = vibrator(ctx)
@@ -60,6 +71,9 @@ object CallAlerts {
         beep(TonePattern.RED)
         main.postDelayed({ stop(ctx) }, RED_MAX_MS)
     }
+
+    /** Vibration from the open-chat banner goes through the same shared Vibrator. */
+    fun pulse(ctx: Context) = vibrate(ctx, VibrationEffect.createWaveform(longArrayOf(0, 400, 150, 400, 150, 400), -1))
 
     fun stop(ctx: Context) {
         redActive = false
