@@ -22,13 +22,15 @@ Every dataset used, with exact name, version, source and date. Raw files live in
 |---|---|---|---|---|---|---|
 | URL-Phish (`Dataset.csv`) | 116,600 URLs: 100,000 benign / 16,600 phishing. Phishing from PhishTank (Nov 2024 – Sep 2025), benign from a Zenodo research-organisation list | Link model: training and held-out test (split by registrable domain) | v2, downloaded 2026-10-28 | CC BY 4.0 (Mendeley Data default; verify on page) | https://data.mendeley.com/datasets/65z9twcx3r/2 | Downloaded |
 | pirocheto/phishing-url (Hannousse & Yahiouche, 2021) | 11,430 URLs: 5,715 legitimate / 5,715 phishing; 62% of benign URLs have real paths | Link model: training and held-out test, added to offset URL-Phish path leakage | HF `data/train.parquet` + `data/test.parquet`, downloaded 2026-10-28 | CC BY 4.0 | https://huggingface.co/datasets/pirocheto/phishing-url | Downloaded |
-| PhiUSIIL Phishing URL Dataset | 235,795 URLs: 100,945 phishing / 134,850 legitimate. **`label` is inverted: 1 = legitimate, 0 = phishing; flip it on load** | Link model: unseen-dataset test only (never used for fitting or tuning) | UCI id 967, downloaded 2026-10-28 | CC BY 4.0 | https://archive.ics.uci.edu/dataset/967 | Downloaded |
+| PhiUSIIL Phishing URL Dataset | 235,795 URLs: 100,945 phishing / 134,850 legitimate. **`label` is inverted: 1 = legitimate, 0 = phishing; flip it on load** | Link model: training (weight 0.2, because every legitimate URL is a bare homepage and at full weight the model learns "has a path = phishing") and held-out test (split by domain) | UCI id 967, downloaded 2026-10-28 | CC BY 4.0 | https://archive.ics.uci.edu/dataset/967 | Downloaded |
 | Phishing.Database: `phishing-domains-ACTIVE.txt` | Phishing domains only, no benign | On-device blocklist layer: 392,151 domains in a 0.70 MB Bloom filter (`blocklist.bloom`). Allowlisted, official, shortener and shared-platform domains are removed | master, downloaded 2026-10-28 | MIT | https://github.com/Phishing-Database/Phishing.Database | Downloaded, built |
 | Phishing.Database: `phishing-links-ACTIVE.txt` | ~66 MB of phishing URLs, no benign | Fresh-phishing recall check (model-only numbers reported separately from blocklist hits). Processed as text only; never opened | master | MIT | same as above | Planned |
-| UCI SMS Spam Collection | 5,574 English SMS: ham / spam | SMS model: training and test (English volume) | v1, downloaded 2026-10-28 | CC BY 4.0 | https://archive.ics.uci.edu/dataset/228 | Downloaded |
+| UCI SMS Spam Collection | 5,574 English SMS: ham / spam | SMS model: training and test (English volume); its normal messages are also call-model negatives | v1, downloaded 2026-10-28 | CC BY 4.0 | https://archive.ics.uci.edu/dataset/228 | Downloaded |
 
-| Indian Cyber Scam PhoneCall Hinglish (`ysangam`) | 10,000 rows but **only 743 unique texts** (633 scam / 110 normal; the rest are template copies). Hinglish call snippets: digital arrest, police blackmail, KYC, Aadhaar, lottery, relative. Its `scam_category` column is unreliable, so reasons are re-derived from the text | On-device LLM: call-style training / test | downloaded 2026-10-28 | Apache-2.0 | https://huggingface.co/datasets/ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset | Downloaded |
-| BothBosu/scam-dialogue | 1,598 synthetic English phone conversations (800 scam / 798 normal; SSN, refund, tech support, reward, delivery, insurance, telemarketing, wrong number). Each is cut to a ~600-character window from a third of the way in | On-device LLM: multi-turn call training / test | downloaded 2026-10-28 | Apache-2.0 | https://huggingface.co/datasets/BothBosu/scam-dialogue | Downloaded |
+| Indian Cyber Scam PhoneCall Hinglish (`ysangam`) | 10,000 rows but **only 743 unique texts** (633 scam / 110 normal; the rest are template copies). Hinglish call snippets: digital arrest, police blackmail, KYC, Aadhaar, lottery, relative. Its `scam_category` column is unreliable, so reasons are re-derived from the text | On-device LLM and call model: training / test (call model splits by template sentence) | downloaded 2026-10-28 | Apache-2.0 | https://huggingface.co/datasets/ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset | Downloaded |
+| BothBosu/scam-dialogue | 1,598 synthetic English phone conversations (800 scam / 798 normal; SSN, refund, tech support, reward, delivery, insurance, telemarketing, wrong number). Each is cut to a ~600-character window from a third of the way in | On-device LLM and call model (caller turns): training / test. Its call type decides its label (every delivery call is normal, every refund call is a scam), so scores on it are optimistic | downloaded 2026-10-28 | Apache-2.0 | https://huggingface.co/datasets/BothBosu/scam-dialogue | Downloaded |
+| DailyDialog (Li et al., 2017; `roskoN/dailydialog` parquet copy) | 13,118 everyday English conversations, no scams | Call model: what a normal call sounds like (negatives), training / test split by dialogue | downloaded 2026-10-29 | **CC BY-NC-SA 4.0 (non-commercial)** | https://huggingface.co/datasets/roskoN/dailydialog | Downloaded |
+| CloveAI/india-spam-sms | 20,010 Indian SMS (14,059 normal / 5,951 spam) but only ~307 templates (bank debits, UPI, bills, recharges, KYC / Aadhaar / prize scams with names and numbers swapped) | SMS model: at most 5 rows per template; train / test split by template | downloaded 2026-10-29 | MIT | https://huggingface.co/datasets/CloveAI/india-spam-sms | Downloaded |
 | bolewara/hinglish-scam-text-dataset | ~3,800 texts, mostly copies of UCI; only the 196 rows not in UCI are used | On-device LLM: extra SMS / Hinglish | downloaded 2026-10-28 | CC BY 4.0 | https://huggingface.co/bolewara/hinglish-scam-text-dataset | Downloaded |
 | Gemma 3 270M instruction-tuned (`unsloth/gemma-3-270m-it`, ungated mirror of `google/gemma-3-270m-it`) | Base model for the on-device scam LLM | Fine-tuned with LoRA | downloaded 2026-10-28 | Gemma Terms of Use | https://huggingface.co/unsloth/gemma-3-270m-it | Downloaded |
 
@@ -76,23 +78,26 @@ python eval_link_extras.py             # parity file, hard negatives, test links
 
 Results are written to `ml/results_link.json`. Decision order, mirrored in Kotlin (`ml/link_engine.py` is the reference): non-http(s) ignored → allowlist → blocklist → shortener (always SUSPICIOUS) → Random Forest over 19 URL features (two thresholds) → brand rules raise SAFE to SUSPICIOUS on non-official domains: `brand_lookalike` (registrable label close to a brand, e.g. `paytrn`) and `brand_in_host` (any host part equal to a brand or one edit away, e.g. `sbi-kyc.example`, added after a live test where that link passed as SAFE).
 
-### Results (2026-10-28, positive class = phishing, FDR = recall)
+### Results (2026-10-29, positive class = phishing, FDR = recall)
+
+Trained on URL-Phish + pirocheto + PhiUSIIL (~290k URLs after the split), split by registrable domain. Thresholds are chosen on validation URLs from URL-Phish + pirocheto, whose legitimate URLs have real paths like the links people actually receive.
 
 | Test set | Level (threshold) | Precision | Recall (FDR) | FPR | N (phishing) |
 |---|---|---|---|---|---|
-| Held-out domains (URL-Phish + pirocheto) | Suspicious (0.679) | 0.900 | 0.833 | 2.13% | 25,156 (4,718) |
-| Held-out domains | Dangerous (0.899) | 0.980 | 0.524 | 0.24% | 25,156 (4,718) |
-| Unseen: PhiUSIIL, training domains removed | Suspicious | 0.981 | 0.316 | 0.32% | 184,543 (63,007) |
-| Unseen: PhiUSIIL | Dangerous | 0.997 | 0.149 | 0.02% | 184,543 (63,007) |
-| Unseen sample, full engine (model + lists + rules) | Suspicious | 0.975 | 0.354 | 0.47% | 40,000 |
-| Hard negatives, model + rules without lists | any warning | | | 37.5% | 40 |
+| Held-out domains with real paths (URL-Phish + pirocheto) | Suspicious (0.817) | 0.871 | 0.649 | 1.54% | 24,071 (3,311) |
+| Same | Dangerous (0.936) | 0.918 | 0.451 | 0.64% | 24,071 (3,311) |
+| Held-out PhiUSIIL domains (homepages) | Suspicious | 0.999 | 0.453 | 0.01% | 41,320 (14,582) |
+| All held-out domains, full engine (model + lists + rules), 40k sample | Suspicious | 0.959 | 0.546 | 0.88% | 40,000 |
+| Hard negatives, model + rules without lists | any warning | | | 20% | 40 |
 | Hard negatives, full engine | any warning | | | 0% | 40 |
 | Device test links L1–L10 | | 10 / 10 pass | | | 10 |
 
+Before PhiUSIIL was added (previous split and thresholds): 0.834 precision / 0.895 recall / 4.1% FPR on URL-Phish + pirocheto, and 0.952 / 0.394 on PhiUSIIL as an unseen set. On the same split, adding PhiUSIIL at weight 0.2 beat leaving it out on every source (precision up, PhiUSIIL recall 0.32 → 0.45, fewer hard-negative false alarms); at full weight it raised false alarms on normal links with paths to 9–43%. The new threshold rule trades recall for fewer false alarms.
+
 What these numbers mean:
-- **Unseen recall is low.** Most PhiUSIIL phishing URLs are bare domains (`www.photopayz.com`) with nothing suspicious in the string; no URL-only model can catch them. The blocklist adds coverage for known campaigns; content (SMS) and user friction cover the rest.
+- **Recall on bare-domain phishing is low.** Most PhiUSIIL phishing URLs are bare domains (`www.photopayz.com`) with nothing suspicious in the string; no URL-only model can catch them. The blocklist adds coverage for known campaigns; content (SMS) and user friction cover the rest.
 - **The model alone over-flags real login pages** (GitHub, Microsoft sign-in, Google Forms) because the training benign data has few login pages. The allowlist removes these false alarms on major sites; long-tail legitimate login pages remain a known weakness.
-- Thresholds are chosen on the held-out test set for precision ≥ 0.90 (suspicious) and ≥ 0.98 (dangerous).
+- Thresholds are chosen on a **validation split carved from the training data** (by domain) for precision ≥ 0.90 (suspicious) and ≥ 0.98 (dangerous); the test set is only scored. An earlier version chose them on the test set itself, which reported 90.0% precision / 2.1% FPR; on untouched data the same target gives 83.4% / 4.1%.
 
 ## Android app: link protection (Phase 2)
 
@@ -136,12 +141,15 @@ Rebuild: `cd ml && python train_sms.py` (writes `sms_model.json`, `thresholds.js
 
 ### Results (2026-10-28, positive class = phishing / scam)
 
+Trained on UCI + CloveAI/india-spam-sms (template-split) + our Indian set. Thresholds are chosen on validation messages from UCI + our set (the template rows are too easy to set a threshold on).
+
 | Test set | Precision | Recall (FDR) | FPR | N (phishing) |
 |---|---|---|---|---|
-| Full engine, all test messages | 0.945 | 0.965 | 0.86% | 1,077 (143) |
-| Full engine, UCI held-out | 0.945 | 0.968 | 0.77% | 1,029 (125) |
-| Full engine, Indian synthetic held-out | 0.944 | 0.944 | 3.3% | 48 (18) |
-| Model only, Indian synthetic held-out | 0.680 | 0.944 | 27% | 48 (18) |
+| Full engine, all test messages | 0.965 | 0.987 | 0.64% | 2,583 (392) |
+| Full engine, UCI held-out | 0.902 | 0.960 | 1.44% | 1,029 (125) |
+| Full engine, Indian bank / UPI / scam messages, unseen templates | 1.000 | 1.000 | 0% | 1,506 (249) |
+| Full engine, Indian synthetic held-out | 0.947 | 1.000 | 3.3% | 48 (18) |
+| Model only, Indian synthetic held-out | 0.692 | 1.000 | 27% | 48 (18) |
 | Promotional messages flagged (Indian held-out) | | | 0 / 14 | 14 |
 
 - The Indian set is small (45 test messages) and synthetic; treat its numbers as indicative only.
@@ -165,6 +173,21 @@ What works, with the phone at the ear and no speakerphone: the system **Live Cap
 Live test (2026-10-29, normal call at the ear): the caller asked for an OTP; captions reached Phisherman, the on-device AI answered `SCAM | credential_request` in 837 ms, and the guard went red with vibration. A bug kept the phone vibrating after the call (the alert was started and stopped through two different `Vibrator` objects, so `cancel()` did not match); fixed by using one shared `Vibrator`.
 
 Second live test: **every call was flagged**, even a call about a picnic. Live Caption shows its own placeholder, "[Call started. Captions will appear here.] English", before anyone speaks; Phisherman passed that to the on-device AI, which had never seen such text and answered `SCAM | other_scam`. Fixes: the caption reader drops Live Caption's UI text; the AI is asked only after 8+ words of real speech; its vague `other_scam` answer is ignored on calls; and on a call the AI alone can reach at most amber; red needs the phrase rules to have heard warning signs too (`VoiceScorerTest.aiAloneNeverMakesACallRed`).
+
+### Trained call model (2026-10-29)
+
+The phrase rules alone caught 22% of held-out scam calls. `ml/train_calls.py` now trains a call model (same TF-IDF + logistic regression format as the SMS model, `assets/call_model.json`, 1.7 MB) on the caller's turns from BothBosu and the Hinglish call set, with DailyDialog conversations and real normal SMS as "normal speech". It is trained on every growing prefix of a call, because the phone scores the call so far after each caption line. Calls are split by call / template sentence; thresholds come from validation calls. On the phone, `CallSession` takes the higher of the rules and the model; the on-device AI can still only raise.
+
+Held-out calls replayed line by line through the phone's `CallSession` (`VoiceDatasetEval`, alert = amber or red):
+
+| Held-out set | Rules only (before) | Rules + model (now) |
+|---|---|---|
+| All: 261 scam calls, 2,829 normal calls / conversations | 57 / 261 caught, 4 false alarms | **261 / 261 caught, 4 false alarms** (the 4 come from the rules) |
+| Hinglish scam calls (unseen templates) | 21 / 108 | 108 / 108, 0 / 27 false |
+| English scam dialogues | 36 / 153 | 153 / 153, 0 / 157 false |
+| Our 18 hand-written Indian calls (never trained on), model alone | | 6 / 7 scams, 0 / 11 false alarms (rules catch the 7th) |
+
+Honest caveat: the public call datasets are synthetic and easy (perfect scores mean they are separable, not that real calls will be). The first version, trained without everyday conversations, scored 100% on the datasets yet flagged **every** normal hand-written call; adding DailyDialog and real SMS as normal speech fixed that. Real calls through Live Caption still need live testing.
 
 ## Prevention (Phase 5) and results (Phase 6)
 

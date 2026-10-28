@@ -1,4 +1,4 @@
-"""Phase 1 extras: parity file, hard-negative FPR, device test links, full-engine unseen recall.
+"""Phase 1 extras: parity file, hard-negative FPR, device test links, full-engine test-set recall.
 
 Run after train_link.py and build_blocklist.py. Merges an "extras" block into results_link.json.
 """
@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 
 import numpy as np
+from sklearn.model_selection import GroupShuffleSplit
 import pandas as pd
 
 from features import FEATURE_NAMES, features, registrable_domain
@@ -65,12 +66,12 @@ def test_links(e):
     return out
 
 
-def unseen_engine(e, n=40000):
-    train_domains = set(load_train_sources().dom)
-    b = pd.read_csv(ML / "data/raw/phiusiil/PhiUSIIL_Phishing_URL_Dataset.csv", usecols=["URL", "label"])
-    b = b.rename(columns={"URL": "url"}).dropna().drop_duplicates("url")
-    b["label"] = 1 - b.label
-    b = b[~b.url.map(registrable_domain).isin(train_domains)].sample(n, random_state=0)
+def test_engine(e, n=40000):
+    """Full engine (lists + model + brand rules) on held-out test domains: the same split as
+    train_link.py, so none of these sites were trained on."""
+    d = load_train_sources()
+    _, te_idx = next(GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42).split(d, d.label, groups=d.dom))
+    b = d.iloc[te_idx].sample(min(n, len(te_idx)), random_state=0)
     y = b.label.values
     res = {}
     for name, lists in (("model_only", False), ("engine", True)):
@@ -87,7 +88,7 @@ def unseen_engine(e, n=40000):
 def main():
     e = LinkEngine()
     extras = {"parity_urls": write_parity(e), "hard_negatives": hard_negatives(e),
-              "test_links": test_links(e), "unseen_engine_sample": unseen_engine(e)}
+              "test_links": test_links(e), "test_engine_sample": test_engine(e)}
     path = ML / "results_link.json"
     results = json.load(open(path))
     results["extras"] = extras
@@ -103,8 +104,8 @@ def main():
     print("test links:")
     for t in extras["test_links"]:
         print(f"   {t['id']:4s} {'PASS' if t['pass'] else 'FAIL'}  got {t['got']:10s} ({t['reason']}, p={t['prob']})  expected {t['expected']}")
-    print("unseen sample, full engine vs model only:")
-    for k, v in extras["unseen_engine_sample"].items():
+    print("held-out test sample, full engine vs model only:")
+    for k, v in extras["test_engine_sample"].items():
         print(f"   {k:22s} P {v['precision']:.3f}  R {v['recall']:.3f}  FPR {v['fpr']:.4f}  N {v['n']}")
 
 

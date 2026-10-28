@@ -50,6 +50,8 @@ class SmsDecider(
         }
 
         if (asks(ASK_RE, norm) || asks(HI_ASK_RE, norm)) { hits += "R_OTP_ASK"; level = 2 }
+        if (APK_FILE_RE.containsMatchIn(norm)) { hits += "R_APK_FILE"; level = 2 }
+        val apkDisguised = APK_DISGUISED_RE.containsMatchIn(norm)
         if (REMOTE_APPS_RE.containsMatchIn(norm) || ".apk" in urls.joinToString(" ") ||
             (INSTALL_APP_RE.containsMatchIn(norm) && linkLevel != null && linkLevel > 0)) {
             hits += "R_APP_INSTALL"; level = 2
@@ -67,7 +69,7 @@ class SmsDecider(
         }
         if (linkLevel != null && linkLevel > level) { level = linkLevel; hits += "LINK" }
         val linksSafe = urls.isEmpty() || linkLevel == 0
-        if ((HEADER_RE.matches(from) || trustedSender) && linksSafe && hits.none { it == "R_OTP_ASK" || it == "R_APP_INSTALL" || it == "R_BRAND_LINK" }) {
+        if ((HEADER_RE.matches(from) || trustedSender) && linksSafe && hits.none { it == "R_OTP_ASK" || it == "R_APP_INSTALL" || it == "R_BRAND_LINK" || it == "R_APK_FILE" }) {
             if (level > 0) hits += "R_ALLOW_SENDER"
             level = 0
         }
@@ -79,7 +81,7 @@ class SmsDecider(
             Level.SUSPICIOUS -> maxOf(display, 50)
             Level.SAFE -> minOf(display, 30)
         }
-        val reasons = if (lvl == Level.SAFE) emptyList() else SmsReasons.build(hits, brandHit, worstLink, cfg)
+        val reasons = if (lvl == Level.SAFE) emptyList() else SmsReasons.build(hits, brandHit, worstLink, cfg, apkDisguised)
         val verdict = Verdict(Channel.SMS, display, lvl, reasons.take(3), p.toFloat(), hits.ifEmpty { listOf("model") },
             (System.nanoTime() - t0) / 1_000_000, from.ifEmpty { "pasted message" })
         return SmsDecision(verdict, p, linkLevel?.let { Level.entries[it] }, urls)
@@ -103,7 +105,10 @@ class SmsDecider(
         private val ASK_RE = Regex("$A$ASK$Z[^.!?]{0,40}?$A$CRED$Z")
         private val HI_ASK_RE = Regex("$A$CRED$Z[^.!?]{0,30}?$A(?:batao|bhejo|share karo|share karein|share kare|de do|dijiye|bata do)$Z")
         private val NEGATION_RE = Regex("$A(?:not|never|don't|dont|mat|na|nahi|no one)$Z")
-        private val REMOTE_APPS_RE = Regex("$A(?:anydesk|teamviewer|quicksupport|quick support|rustdesk|airdroid)$Z")
+        /** An Android app file in a message or attachment, e.g. "KYC_Update.apk" or disguised "Form.pdf.apk" */
+        private val APK_FILE_RE = Regex("[a-z0-9_()\\-.]+\\.(?:apk|xapk|apks|apkm)(?![a-z0-9])")
+        private val APK_DISGUISED_RE = Regex("\\.(?:pdf|jpe?g|png|docx?|xlsx?|mp4|txt)\\.(?:apk|xapk|apks|apkm)(?![a-z0-9])")
+        private val REMOTE_APPS_RE =Regex("$A(?:anydesk|teamviewer|quicksupport|quick support|rustdesk|airdroid)$Z")
         private val INSTALL_APP_RE = Regex("$A(?:install|download)$Z[^.!?]{0,50}?$A(?:app|apk|application)$Z")
         private val URGENT_RE = Regex(
             "$A(?:urgent|jaldi|today|tonight|expire|expires|expiring|expired|last warning|final notice|" +
@@ -119,8 +124,14 @@ class SmsDecider(
 }
 
 object SmsReasons {
-    fun build(hits: List<String>, brandHit: Pair<String, String>?, link: Verdict?, cfg: LinkConfig): List<Reason> {
+    fun build(hits: List<String>, brandHit: Pair<String, String>?, link: Verdict?, cfg: LinkConfig, apkDisguised: Boolean = false): List<Reason> {
         val out = mutableListOf<Reason>()
+        if ("R_APK_FILE" in hits) out += if (apkDisguised) Reason("R_APK_FILE",
+            "An app file pretending to be a document. Do NOT open or install it.",
+            "दस्तावेज़ जैसा दिखने वाली ऐप फ़ाइल। इसे न खोलें, न इंस्टॉल करें।")
+        else Reason("R_APK_FILE",
+            "Contains an Android app file (.apk). Banks and companies never send apps like this.",
+            "इसमें Android ऐप फ़ाइल (.apk) है। बैंक कभी ऐसे ऐप नहीं भेजते।")
         if ("R_OTP_ASK" in hits) out += Reason("R_OTP_ASK",
             "Asks you to share an OTP, PIN or card details. Banks never ask for these.",
             "OTP, PIN या कार्ड की जानकारी माँगता है। बैंक कभी ये नहीं माँगते।")

@@ -60,22 +60,28 @@ def main():
     hn = link["extras"]["hard_negatives"]
     links_ok = sum(t["pass"] for t in link["extras"]["test_links"])
     promo = sms["engine_promotional_fpr"]
-    # calls: VoiceScorerTest asserts all 7 scam scripts turn red before the payment demand and
-    # none of the 11 normal / customer-care / genuine-bank scripts turns red
-    calls = {"tp": 7, "fn": 0, "fp": 0, "tn": 11}
+    # calls: held-out calls (train_calls.py split) replayed through the phone's CallSession by
+    # VoiceDatasetEval; alert = amber or red. "combined" = rules + trained model, what the app runs
+    voice = json.load(open(ML / "results_voice.json", encoding="utf-8"))
+    calls_model = json.load(open(ML / "results_calls_model.json", encoding="utf-8"))
+    scripts = calls_model["test"]["scripts"]["alert"]
 
     results = {
         "generated": time.strftime("%Y-%m-%d"),
         "positive_class": "phishing / scam",
         "channels": [
             {"id": "link", "name": "Links", "icon": "link",
-             "headline": summary(link["test"]["suspicious"], "Held-out websites (URL-Phish + pirocheto)"),
-             "more": [summary(link["unseen"]["suspicious"], "Unseen dataset (PhiUSIIL, never trained on)")],
+             "headline": summary(link["test_real_paths"]["suspicious"], "Held-out websites with real paths (URL-Phish + pirocheto)"),
+             "more": [summary(link["test_by_source"]["phiusiil"], "Held-out PhiUSIIL websites (homepages)"),
+                      summary(link["test"]["suspicious"], "All held-out websites (3 datasets)")],
              "notes": [f"False alarms on real bank / login pages: {hn['fpr_engine'] * 100:.1f}% of {hn['n']}",
-                       f"Phone test links: {links_ok} of {len(link['extras']['test_links'])} as expected"]},
+                       f"Phone test links: {links_ok} of {len(link['extras']['test_links'])} as expected",
+                       "Trained on about 290k URLs from 3 public datasets; sites in the test set were never trained on"]},
             {"id": "sms", "name": "SMS & chats", "icon": "sms",
              "headline": summary(sms["engine"]["all"], "Held-out messages (UCI + Indian)"),
-             "more": [summary(sms["engine"]["india_synthetic"], "Indian / Hinglish messages (synthetic)")],
+             "more": [summary(sms["engine"]["india_hf"], "Indian bank / UPI / scam messages (unseen templates)"),
+                      summary(sms["engine"]["uci"], "UCI SMS (real messages)"),
+                      summary(sms["engine"]["india_synthetic"], "Indian / Hinglish messages (hand-written)")],
              "notes": [f"Promotional messages flagged: {promo['flagged']} of {promo['n']}"]},
             {"id": "ai", "name": "On-device AI", "icon": "ai",
              "headline": summary(llm["fine_tuned"]["all"], "All held-out sets"),
@@ -84,9 +90,14 @@ def main():
              "notes": ["Gemma 3 270M, fine-tuned, runs offline on the phone",
                        f"Same model before fine-tuning caught {llm['base']['all']['recall'] * 100:.0f}% (could not follow the task)"]},
             {"id": "calls", "name": "Calls", "icon": "call",
-             "headline": summary(calls, "Scripted calls (7 scam, 11 normal / genuine bank)"),
-             "more": [],
-             "notes": ["Every scam call turned red before the payment demand", "Small, scripted set: indicative only"]},
+             "headline": summary(voice["all"]["combined"]["alert"], "Held-out calls + everyday conversations, any alert"),
+             "more": [summary(voice["all"]["rules"]["alert"], "Same calls, phrase rules only (before training)"),
+                      summary(voice["ysangam"]["combined"]["alert"], "Hinglish scam calls (unseen templates)"),
+                      summary(voice["bothbosu"]["combined"]["alert"], "English scam dialogues (synthetic)"),
+                      summary(scripts, "Our 18 hand-written Indian calls (never trained on)")],
+             "notes": ["Trained model + phrase rules, on the caller's words from Live Caption",
+                       "Public call datasets are synthetic and easy; real calls will be harder than these numbers",
+                       "The on-device AI adds a second opinion on calls (amber on its own)"]},
         ],
         "link_threshold": {"chosen": link["thresholds"]["suspicious"], "curve": curve, "n": n_curve},
     }

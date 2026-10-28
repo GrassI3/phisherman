@@ -49,8 +49,34 @@ class ChatScreenReader : AccessibilityService() {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, Boolean>?) = size > 300
     }
 
+    private var lastInstallerAlert = 0L
+
+    /**
+     * However an APK was disguised (fake PDF, renamed file, link download), installing it opens
+     * Android's package installer. Warn at that moment, before the user taps Install.
+     */
+    private fun onInstallerOpened() {
+        val now = System.currentTimeMillis()
+        if (now - lastInstallerAlert < 30_000) return
+        // the same installer also asks "uninstall this app?"; only an install prompt is a risk
+        val texts = mutableListOf<Triple<Rect, String, String?>>()
+        collect(rootInActiveWindow, texts)
+        val screen = texts.joinToString(" ") { it.second }.lowercase()
+        if ("uninstall" in screen || "install" !in screen) return
+        lastInstallerAlert = now
+        Log.i(TAG, "package installer opened")
+        banner?.warn("⚠ Installing an app from outside the Play Store",
+            "Scammers send fake bank, KYC and \"support\" apps as files on WhatsApp, SMS or email.",
+            "If someone sent you this file, tap Cancel. Banks never ask you to install apps this way.",
+            com.phisherman.engine.Level.DANGEROUS, null)
+    }
+
     override fun onAccessibilityEvent(e: AccessibilityEvent) {
         val pkg = e.packageName?.toString()
+        if (pkg in INSTALLER_PKGS) {
+            if (e.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) onInstallerOpened()
+            return
+        }
         if (pkg == CAPTION_PKG || (e.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED && CallWatcher.inCall)) {
             if (CallWatcher.inCall) readCaptions()
             return
@@ -75,9 +101,12 @@ class ChatScreenReader : AccessibilityService() {
         val height = resources.displayMetrics.heightPixels
         val all = mutableListOf<Triple<Rect, String, String?>>()
         collect(root, all)
-        // WhatsApp marks message bubbles with an id; elsewhere (chat list, other apps) use all text
+        // WhatsApp marks message bubbles with an id. Other apps: only a real chat screen counts, one
+        // with a message box ("Message…") at the bottom; feeds like Instagram Reels (captions,
+        // usernames, "Follow") or comment sheets ("Add a comment…") are never read
         val bubbles = all.filter { it.third?.endsWith(":id/message_text") == true }
         if (pkg.startsWith("com.whatsapp") && bubbles.isEmpty()) return  // not inside a chat
+        if (bubbles.isEmpty() && !hasMessageComposer(root)) return
         val texts = (if (bubbles.isNotEmpty()) bubbles else all).map { it.first to it.second }
 
         val sender = all.firstOrNull { it.third?.endsWith(":id/conversation_contact_name") == true }?.second
@@ -85,7 +114,7 @@ class ChatScreenReader : AccessibilityService() {
         val incoming = texts.filter { (r, t) ->
             r.top > height * 0.12 && r.bottom < height * 0.92 &&   // not the toolbar or the typing bar
                 r.centerX() < width / 2 &&                           // left side = incoming bubble
-                t.length >= 6 && !TIME_RE.matches(t)
+                t.length >= 6 && !TIME_RE.matches(t) && t.trim().lowercase() !in UI_WORDS
         }.sortedBy { it.first.top }.map { it.second }
 
         // first look at a chat: only the newest few, so opening an old chat does not alert on history
@@ -153,6 +182,17 @@ class ChatScreenReader : AccessibilityService() {
         CallGuard.onCaption(this, text)
     }
 
+    /** A chat screen has a text box for writing a message; feeds and comment sheets do not. */
+    private fun hasMessageComposer(n: AccessibilityNodeInfo?): Boolean {
+        if (n == null) return false
+        if (n.isEditable || n.className?.toString()?.endsWith("EditText") == true) {
+            val hint = listOfNotNull(n.hintText, n.text, n.contentDescription).joinToString(" ").lowercase()
+            if (COMPOSER_HINT.containsMatchIn(hint) && !COMMENT_HINT.containsMatchIn(hint)) return true
+        }
+        for (i in 0 until n.childCount) if (hasMessageComposer(n.getChild(i))) return true
+        return false
+    }
+
     /** An opened email shows a Reply button (text or icon description); the inbox list does not. */
     private fun hasReplyButton(n: AccessibilityNodeInfo?): Boolean {
         if (n == null) return false
@@ -205,7 +245,14 @@ class ChatScreenReader : AccessibilityService() {
             "com.samsung.android.email.provider" to "Samsung Email",
         )
 
+        /** Android's app installer (Google's on most phones, including Samsung). */
+        private val INSTALLER_PKGS = setOf("com.google.android.packageinstaller", "com.android.packageinstaller",
+            "com.samsung.android.packageinstaller")
         private val REPLY_LABELS = setOf("reply", "reply all", "उत्तर दें", "जवाब दें")
+        private val COMPOSER_HINT = Regex("message|text|chat|type|write|rcs|sms|संदेश|मैसेज")
+        private val COMMENT_HINT = Regex("comment|reply to|search|caption")
+        /** Buttons and labels that are never a message ("Follow", "Like"…). */
+        private val UI_WORDS = setOf("follow", "following", "message", "like", "share", "send", "reply", "view profile", "see translation")
 
         /** Buttons and labels in email screens that are not part of the message. */
         private val EMAIL_CHROME = setOf("Reply", "Reply all", "Forward", "Inbox", "Show quoted text", "Details", "to me", "Translate", "Unsubscribe")

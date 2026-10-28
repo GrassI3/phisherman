@@ -107,6 +107,23 @@
                 android:resource="@xml/chat_reader" />
         </service>
 
+        <!-- share any file to Phisherman: checks whether it is really an app (APK), whatever its name -->
+        <activity
+            android:name=".ui.FileCheckActivity"
+            android:exported="true"
+            android:label="Check file with Phisherman">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.MetricsActivity"
             android:exported="false" />

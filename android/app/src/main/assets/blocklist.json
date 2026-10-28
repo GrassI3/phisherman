@@ -1,7 +1,7 @@
 {
   "version": "block-1",
   "source": "Phishing.Database phishing-domains-ACTIVE.txt (MIT)",
-  "built": "2026-10-28",
+  "built": "2026-10-29",
   "entries": 392151,
   "dropped": 11,
   "m_bits": 5638192,

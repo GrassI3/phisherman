@@ -28,10 +28,17 @@ class AlertBanner(private val service: AccessibilityService) {
     private val wm = service.getSystemService(WindowManager::class.java)
     private var view: View? = null
 
-    fun show(body: String, v: Verdict) = main.post {
+    fun show(body: String, v: Verdict) {
+        val title = if (v.level == Level.DANGEROUS) "⚠ Scam message from ${v.subject}" else "Suspicious message from ${v.subject}"
+        warn(title, v.reasons.firstOrNull()?.textEn ?: "This message looks risky",
+            "Don't click links or share OTP, PIN or card details.", v.level) { openDetails(body, v) }
+    }
+
+    /** Any warning banner; onDetails = null hides the VIEW DETAILS action. */
+    fun warn(title: String, line1: String, line2: String, level: Level, onDetails: (() -> Unit)?) = main.post {
         hide()
         val dp = { x: Int -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, x.toFloat(), service.resources.displayMetrics).toInt() }
-        val red = if (v.level == Level.DANGEROUS) Color.rgb(0xB3, 0x26, 0x1E) else Color.rgb(0xB2, 0x6A, 0x00)
+        val red = if (level == Level.DANGEROUS) Color.rgb(0xB3, 0x26, 0x1E) else Color.rgb(0xB2, 0x6A, 0x00)
         val box = LinearLayout(service).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(18), dp(14), dp(18), dp(14))
@@ -42,18 +49,19 @@ class AlertBanner(private val service: AccessibilityService) {
             this.text = s; setTextColor(Color.WHITE); textSize = size
             if (bold) typeface = Typeface.DEFAULT_BOLD
         }
-        val title = if (v.level == Level.DANGEROUS) "⚠ Scam message from ${v.subject}" else "Suspicious message from ${v.subject}"
         box.addView(text(title, 18f, bold = true))
-        box.addView(text(v.reasons.firstOrNull()?.textEn ?: "This message looks risky", 15f))
-        box.addView(text("Don't click links or share OTP, PIN or card details.", 13f))
+        box.addView(text(line1, 15f))
+        box.addView(text(line2, 13f))
         val row = LinearLayout(service).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END; setPadding(0, dp(8), 0, 0) }
         row.addView(text("DISMISS", 14f, bold = true).apply { setPadding(dp(12), dp(6), dp(12), dp(6)); setOnClickListener { hide() } })
-        row.addView(text("VIEW DETAILS", 14f, bold = true).apply {
-            setPadding(dp(12), dp(6), dp(4), dp(6))
-            setOnClickListener { openDetails(body, v) }
-        })
+        if (onDetails != null) {
+            row.addView(text("VIEW DETAILS", 14f, bold = true).apply {
+                setPadding(dp(12), dp(6), dp(4), dp(6))
+                setOnClickListener { onDetails() }
+            })
+            box.setOnClickListener { onDetails() }
+        }
         box.addView(row)
-        box.setOnClickListener { openDetails(body, v) }
 
         val lp = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,
@@ -69,6 +77,7 @@ class AlertBanner(private val service: AccessibilityService) {
         }
         vibrate()
         main.postDelayed({ hide() }, 15_000)
+        Unit
     }
 
     private fun openDetails(body: String, v: Verdict) {

@@ -1,7 +1,10 @@
 package com.phisherman.voice
 
 import com.phisherman.engine.Level
+import com.phisherman.sms.SmsModel
+import com.phisherman.sms.SmsNormalizer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.double
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -102,6 +105,34 @@ class VoiceScorer(private val rules: VoiceRules) {
     }
 }
 
+/**
+ * The call model trained by ml/train_calls.py on public scam-call datasets (call_model.json, same
+ * format as the SMS model). It scores the whole call so far, like the training prefixes.
+ */
+class CallModel(private val model: SmsModel, val suspicious: Double, val dangerous: Double, val minWords: Int) {
+    fun score(transcript: String): Pair<Double, Level> {
+        val words = SmsNormalizer.splitWs(transcript)
+        if (words.size < minWords) return 0.0 to Level.SAFE
+        val p = model.prob(SmsNormalizer.normalize(words.takeLast(MAX_WORDS).joinToString(" ")).text)
+        return p to when {
+            p >= dangerous -> Level.DANGEROUS
+            p >= suspicious -> Level.SUSPICIOUS
+            else -> Level.SAFE
+        }
+    }
+
+    companion object {
+        const val ID = "call_model"
+        private const val MAX_WORDS = 400
+
+        fun load(modelJson: String, thresholdsJson: String): CallModel {
+            val th = Json.parseToJsonElement(thresholdsJson).jsonObject["call"]!!.jsonObject
+            return CallModel(SmsModel(modelJson), th["suspicious"]!!.jsonPrimitive.double,
+                th["dangerous"]!!.jsonPrimitive.double, th["min_words"]!!.jsonPrimitive.int)
+        }
+    }
+}
+
 /** What a context model (the on-device LLM) said about the window. */
 data class Judgement(val level: Level, val reason: String)
 
@@ -109,7 +140,11 @@ data class Judgement(val level: Level, val reason: String)
  * One guarded call: a rolling transcript window, the rule score, an optional LLM opinion that can
  * only raise the level, and hysteresis (once DANGEROUS, the rest of the call stays DANGEROUS).
  */
-class CallSession(private val rules: VoiceRules, private val now: () -> Long = System::currentTimeMillis) {
+class CallSession(
+    private val rules: VoiceRules,
+    private val model: CallModel? = null,
+    private val now: () -> Long = System::currentTimeMillis,
+) {
     private val scorer = VoiceScorer(rules)
     private val finals = ArrayDeque<Pair<Long, String>>()
     private var partial = ""
@@ -142,15 +177,27 @@ class CallSession(private val rules: VoiceRules, private val now: () -> Long = S
         if (llm == null || j.level > llm!!.level) llm = j
     }
 
+    /** The whole call so far (the trained model looks at all of it, the rules at the last minute). */
+    fun callText(): String = (transcriptLog + partial).filter { it.isNotBlank() }.joinToString(" ")
+
+    var modelProb = 0.0
+        private set
+
     fun update(): VoiceScore {
         val s = scorer.score(windowText())
         seen += s.categories
         maxScore = maxOf(maxScore, s.score)
         var level = s.level
+        model?.let { m ->
+            val (p, lv) = m.score(callText())
+            modelProb = maxOf(modelProb, p)
+            if (lv >= Level.SUSPICIOUS) seen += CallModel.ID
+            if (lv > level) level = lv
+        }
         llm?.let { j ->
-            // the AI alone reaches at most amber; it can lift amber (rules already heard warning
-            // signs) to red, but a call with no rule signal never goes red on the AI's word
-            val cap = if (s.level >= Level.SUSPICIOUS) Level.DANGEROUS else Level.SUSPICIOUS
+            // the AI alone reaches at most amber; it can lift amber (rules or the call model already
+            // heard warning signs) to red, but a call with no other signal never goes red on its word
+            val cap = if (level >= Level.SUSPICIOUS) Level.DANGEROUS else Level.SUSPICIOUS
             val ai = if (j.level > cap) cap else j.level
             if (ai > level) level = ai
         }

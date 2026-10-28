@@ -7,40 +7,56 @@
       "name": "Links",
       "icon": "link",
       "headline": {
-        "set": "Held-out websites (URL-Phish + pirocheto)",
-        "n": 25156,
-        "scams": 4718,
-        "precision": 0.9002,
-        "recall": 0.8332,
-        "fdr": 0.8332,
-        "accuracy": 0.9514,
-        "f1": 0.8654,
-        "fpr": 0.0213,
-        "tp": 3931,
-        "fp": 436,
-        "fn": 787,
-        "tn": 20002
+        "set": "Held-out websites with real paths (URL-Phish + pirocheto)",
+        "n": 24071,
+        "scams": 3311,
+        "precision": 0.8707,
+        "recall": 0.6487,
+        "fdr": 0.6487,
+        "accuracy": 0.9384,
+        "f1": 0.7435,
+        "fpr": 0.0154,
+        "tp": 2148,
+        "fp": 319,
+        "fn": 1163,
+        "tn": 20441
       },
       "more": [
         {
-          "set": "Unseen dataset (PhiUSIIL, never trained on)",
-          "n": 184543,
-          "scams": 63007,
-          "precision": 0.9806,
-          "recall": 0.3161,
-          "fdr": 0.3161,
-          "accuracy": 0.7644,
-          "f1": 0.478,
-          "fpr": 0.0032,
-          "tp": 19914,
-          "fp": 394,
-          "fn": 43093,
-          "tn": 121142
+          "set": "Held-out PhiUSIIL websites (homepages)",
+          "n": 41320,
+          "scams": 14582,
+          "precision": 0.9994,
+          "recall": 0.4526,
+          "fdr": 0.4526,
+          "accuracy": 0.8067,
+          "f1": 0.6231,
+          "fpr": 0.0001,
+          "tp": 6600,
+          "fp": 4,
+          "fn": 7982,
+          "tn": 26734
+        },
+        {
+          "set": "All held-out websites (3 datasets)",
+          "n": 65391,
+          "scams": 17893,
+          "precision": 0.9644,
+          "recall": 0.4889,
+          "fdr": 0.4889,
+          "accuracy": 0.8552,
+          "f1": 0.6489,
+          "fpr": 0.0068,
+          "tp": 8748,
+          "fp": 323,
+          "fn": 9145,
+          "tn": 47175
         }
       ],
       "notes": [
         "False alarms on real bank / login pages: 0.0% of 40",
-        "Phone test links: 10 of 10 as expected"
+        "Phone test links: 10 of 10 as expected",
+        "Trained on about 290k URLs from 3 public datasets; sites in the test set were never trained on"
       ]
     },
     {
@@ -49,33 +65,63 @@
       "icon": "sms",
       "headline": {
         "set": "Held-out messages (UCI + Indian)",
-        "n": 1077,
-        "scams": 143,
-        "precision": 0.9452,
-        "recall": 0.965,
-        "fdr": 0.965,
-        "accuracy": 0.9879,
-        "f1": 0.955,
-        "fpr": 0.0086,
-        "tp": 138,
-        "fp": 8,
+        "n": 2583,
+        "scams": 392,
+        "precision": 0.9651,
+        "recall": 0.9872,
+        "fdr": 0.9872,
+        "accuracy": 0.9926,
+        "f1": 0.976,
+        "fpr": 0.0064,
+        "tp": 387,
+        "fp": 14,
         "fn": 5,
-        "tn": 926
+        "tn": 2177
       },
       "more": [
         {
-          "set": "Indian / Hinglish messages (synthetic)",
+          "set": "Indian bank / UPI / scam messages (unseen templates)",
+          "n": 1506,
+          "scams": 249,
+          "precision": 1.0,
+          "recall": 1.0,
+          "fdr": 1.0,
+          "accuracy": 1.0,
+          "f1": 1.0,
+          "fpr": 0.0,
+          "tp": 249,
+          "fp": 0,
+          "fn": 0,
+          "tn": 1257
+        },
+        {
+          "set": "UCI SMS (real messages)",
+          "n": 1029,
+          "scams": 125,
+          "precision": 0.9023,
+          "recall": 0.96,
+          "fdr": 0.96,
+          "accuracy": 0.9825,
+          "f1": 0.9302,
+          "fpr": 0.0144,
+          "tp": 120,
+          "fp": 13,
+          "fn": 5,
+          "tn": 891
+        },
+        {
+          "set": "Indian / Hinglish messages (hand-written)",
           "n": 48,
           "scams": 18,
-          "precision": 0.9444,
-          "recall": 0.9444,
-          "fdr": 0.9444,
-          "accuracy": 0.9583,
-          "f1": 0.9444,
+          "precision": 0.9474,
+          "recall": 1.0,
+          "fdr": 1.0,
+          "accuracy": 0.9792,
+          "f1": 0.973,
           "fpr": 0.0333,
-          "tp": 17,
+          "tp": 18,
           "fp": 1,
-          "fn": 1,
+          "fn": 0,
           "tn": 29
         }
       ],
@@ -144,145 +190,207 @@
       "name": "Calls",
       "icon": "call",
       "headline": {
-        "set": "Scripted calls (7 scam, 11 normal / genuine bank)",
-        "n": 18,
-        "scams": 7,
-        "precision": 1.0,
+        "set": "Held-out calls + everyday conversations, any alert",
+        "n": 3090,
+        "scams": 261,
+        "precision": 0.9849,
         "recall": 1.0,
         "fdr": 1.0,
-        "accuracy": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0,
-        "tp": 7,
-        "fp": 0,
+        "accuracy": 0.9987,
+        "f1": 0.9924,
+        "fpr": 0.0014,
+        "tp": 261,
+        "fp": 4,
         "fn": 0,
-        "tn": 11
+        "tn": 2825
       },
-      "more": [],
+      "more": [
+        {
+          "set": "Same calls, phrase rules only (before training)",
+          "n": 3090,
+          "scams": 261,
+          "precision": 0.9344,
+          "recall": 0.2184,
+          "fdr": 0.2184,
+          "accuracy": 0.9327,
+          "f1": 0.354,
+          "fpr": 0.0014,
+          "tp": 57,
+          "fp": 4,
+          "fn": 204,
+          "tn": 2825
+        },
+        {
+          "set": "Hinglish scam calls (unseen templates)",
+          "n": 135,
+          "scams": 108,
+          "precision": 1.0,
+          "recall": 1.0,
+          "fdr": 1.0,
+          "accuracy": 1.0,
+          "f1": 1.0,
+          "fpr": 0.0,
+          "tp": 108,
+          "fp": 0,
+          "fn": 0,
+          "tn": 27
+        },
+        {
+          "set": "English scam dialogues (synthetic)",
+          "n": 310,
+          "scams": 153,
+          "precision": 1.0,
+          "recall": 1.0,
+          "fdr": 1.0,
+          "accuracy": 1.0,
+          "f1": 1.0,
+          "fpr": 0.0,
+          "tp": 153,
+          "fp": 0,
+          "fn": 0,
+          "tn": 157
+        },
+        {
+          "set": "Our 18 hand-written Indian calls (never trained on)",
+          "n": 18,
+          "scams": 7,
+          "precision": 1.0,
+          "recall": 0.8571,
+          "fdr": 0.8571,
+          "accuracy": 0.9444,
+          "f1": 0.9231,
+          "fpr": 0.0,
+          "tp": 6,
+          "fp": 0,
+          "fn": 1,
+          "tn": 11
+        }
+      ],
       "notes": [
-        "Every scam call turned red before the payment demand",
-        "Small, scripted set: indicative only"
+        "Trained model + phrase rules, on the caller's words from Live Caption",
+        "Public call datasets are synthetic and easy; real calls will be harder than these numbers",
+        "The on-device AI adds a second opinion on calls (amber on its own)"
       ]
     }
   ],
   "link_threshold": {
-    "chosen": 0.6791080165633615,
+    "chosen": 0.8169450574396973,
     "curve": [
       {
         "threshold": 0.05,
-        "precision": 0.3311,
-        "recall": 0.9915,
-        "fpr": 0.4623
+        "precision": 0.3402,
+        "recall": 0.9969,
+        "fpr": 0.7284
       },
       {
         "threshold": 0.1,
-        "precision": 0.4254,
-        "recall": 0.9828,
-        "fpr": 0.3064
+        "precision": 0.6241,
+        "recall": 0.9834,
+        "fpr": 0.2231
       },
       {
         "threshold": 0.15,
-        "precision": 0.5068,
-        "recall": 0.9739,
-        "fpr": 0.2188
+        "precision": 0.7222,
+        "recall": 0.9642,
+        "fpr": 0.1397
       },
       {
         "threshold": 0.2,
-        "precision": 0.5726,
-        "recall": 0.9621,
-        "fpr": 0.1658
+        "precision": 0.7717,
+        "recall": 0.9508,
+        "fpr": 0.106
       },
       {
         "threshold": 0.25,
-        "precision": 0.6253,
-        "recall": 0.9538,
-        "fpr": 0.1319
+        "precision": 0.8173,
+        "recall": 0.9344,
+        "fpr": 0.0787
       },
       {
         "threshold": 0.3,
-        "precision": 0.6914,
-        "recall": 0.9411,
-        "fpr": 0.097
+        "precision": 0.8544,
+        "recall": 0.9245,
+        "fpr": 0.0594
       },
       {
         "threshold": 0.35,
-        "precision": 0.747,
-        "recall": 0.925,
-        "fpr": 0.0723
+        "precision": 0.8789,
+        "recall": 0.9141,
+        "fpr": 0.0474
       },
       {
         "threshold": 0.4,
-        "precision": 0.7886,
-        "recall": 0.911,
-        "fpr": 0.0564
+        "precision": 0.8937,
+        "recall": 0.9079,
+        "fpr": 0.0407
       },
       {
         "threshold": 0.45,
-        "precision": 0.8106,
-        "recall": 0.9042,
-        "fpr": 0.0488
+        "precision": 0.9049,
+        "recall": 0.8983,
+        "fpr": 0.0356
       },
       {
         "threshold": 0.5,
-        "precision": 0.8352,
-        "recall": 0.8947,
-        "fpr": 0.0408
+        "precision": 0.9153,
+        "recall": 0.8853,
+        "fpr": 0.0308
       },
       {
         "threshold": 0.55,
-        "precision": 0.8564,
-        "recall": 0.8838,
-        "fpr": 0.0342
+        "precision": 0.9253,
+        "recall": 0.8718,
+        "fpr": 0.0265
       },
       {
         "threshold": 0.6,
-        "precision": 0.8744,
-        "recall": 0.8571,
-        "fpr": 0.0284
+        "precision": 0.9336,
+        "recall": 0.8474,
+        "fpr": 0.0227
       },
       {
         "threshold": 0.65,
-        "precision": 0.8923,
-        "recall": 0.8427,
-        "fpr": 0.0235
+        "precision": 0.9397,
+        "recall": 0.8298,
+        "fpr": 0.0201
       },
       {
         "threshold": 0.7,
-        "precision": 0.9063,
-        "recall": 0.8205,
-        "fpr": 0.0196
+        "precision": 0.9452,
+        "recall": 0.7998,
+        "fpr": 0.0175
       },
       {
         "threshold": 0.75,
-        "precision": 0.9209,
-        "recall": 0.7916,
-        "fpr": 0.0157
+        "precision": 0.9539,
+        "recall": 0.707,
+        "fpr": 0.0129
       },
       {
         "threshold": 0.8,
-        "precision": 0.9368,
-        "recall": 0.7232,
-        "fpr": 0.0113
+        "precision": 0.9618,
+        "recall": 0.5146,
+        "fpr": 0.0077
       },
       {
         "threshold": 0.85,
-        "precision": 0.9611,
-        "recall": 0.6501,
-        "fpr": 0.0061
+        "precision": 0.9676,
+        "recall": 0.4346,
+        "fpr": 0.0055
       },
       {
         "threshold": 0.9,
-        "precision": 0.9805,
-        "recall": 0.5214,
-        "fpr": 0.0024
+        "precision": 0.9703,
+        "recall": 0.3597,
+        "fpr": 0.0041
       },
       {
         "threshold": 0.95,
-        "precision": 0.9922,
-        "recall": 0.4031,
-        "fpr": 0.0007
+        "precision": 0.9797,
+        "recall": 0.254,
+        "fpr": 0.002
       }
     ],
-    "n": 25156
+    "n": 65391
   }
 }

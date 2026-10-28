@@ -3,7 +3,7 @@ package com.phisherman.engine
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Channel { LINK, SMS, VOICE }
+enum class Channel { LINK, SMS, VOICE, FILE }
 
 @Serializable
 enum class Level { SAFE, SUSPICIOUS, DANGEROUS }

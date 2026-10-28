@@ -1,9 +1,11 @@
 """Train the SMS model (TF-IDF word + char_wb n-grams, logistic regression) and export JSON.
 
-Data: UCI SMS Spam Collection (ham -> normal, spam -> scam) + our hand-written Indian set
-(phishing / normal / promotional, all synthetic). Positive class = phishing/scam.
+Data: UCI SMS Spam Collection (ham -> normal, spam -> scam), CloveAI/india-spam-sms (Indian bank
+alerts, UPI, bills, KYC/Aadhaar scams; template-generated, so split by template and capped per
+template) and our hand-written Indian set (phishing / normal / promotional). Positive = scam.
 """
 import csv
+import re
 import json
 import time
 from pathlib import Path
@@ -13,7 +15,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GroupShuffleSplit, train_test_split
 from sklearn.pipeline import FeatureUnion
 
 from normalize import NORMALIZER_VERSION, normalize
@@ -22,6 +24,7 @@ from sms_engine import SmsEngine, TOKEN_PATTERN
 ML = Path(__file__).resolve().parent
 ASSETS = ML.parent / "android/app/src/main/assets"
 SYNTHETIC_WEIGHT = 3.0  # our Indian messages are few; weight them up in training
+PER_TEMPLATE = 5        # rows kept per CloveAI template (20k rows are ~300 templates)
 
 
 def load():
@@ -30,11 +33,21 @@ def load():
     uci = uci.assign(cls=uci.label.map({"ham": "normal", "spam": "phishing"}), sender="", source="uci")
     ind = pd.read_csv(ML / "sms_india_synthetic.tsv", sep="\t", quoting=csv.QUOTE_NONE, encoding="utf-8")
     ind = ind.rename(columns={"label": "cls"}).assign(source="india_synthetic")
-    d = pd.concat([uci[["cls", "sender", "text", "source"]], ind[["cls", "sender", "text", "source"]]], ignore_index=True)
+    hf = pd.read_parquet(ML / "data/raw/india_spam_sms/train.parquet")
+    hf = hf.assign(cls=hf.label.map({0: "normal", 1: "phishing"}), sender="", source="india_hf",
+                   template=hf.text.map(template_key))
+    hf = hf.groupby("template", group_keys=False).head(PER_TEMPLATE)
+    d = pd.concat([uci[["cls", "sender", "text", "source"]], ind[["cls", "sender", "text", "source"]],
+                   hf[["cls", "sender", "text", "source", "template"]]], ignore_index=True)
     d["sender"] = d.sender.fillna("").astype(str)
     d["y"] = (d.cls == "phishing").astype(int)
     d["norm"] = d.text.map(lambda t: normalize(t)[0])
     return d.drop_duplicates("norm")
+
+
+def template_key(t):
+    """Generated messages differ only in names and numbers; those collapse to one template."""
+    return re.sub(r"[A-Z][a-z]+|[0-9]+", "#", t)
 
 
 def split(d):
@@ -43,6 +56,9 @@ def split(d):
         s = d[d.source == src]
         tr, te = train_test_split(s, test_size=frac, stratify=s.cls, random_state=42)
         parts.append((tr, te))
+    s = d[d.source == "india_hf"]  # by template: the same template is never in train and test
+    a, b = next(GroupShuffleSplit(n_splits=1, test_size=0.25, random_state=42).split(s, groups=s.template))
+    parts.append((s.iloc[a], s.iloc[b]))
     return pd.concat([p[0] for p in parts]), pd.concat([p[1] for p in parts])
 
 
@@ -69,6 +85,9 @@ PARITY_EXTRA = [  # edge cases on top of the Indian test messages
     ("VM-SBIINB", "Your statement is ready. Pay via onlinesbi.sbi"),
     ("", "Install TeamViewer now"),
     ("+919876543210", "SBI: update your KYC at sbi-kyc.example/login today"),
+    ("Rahul", "KYC_Update_Form.pdf.apk"),
+    ("9876543210", "Please install SBI_Rewards.apk to claim your points"),
+    ("Rahul", "Bank statement.pdf"),
 ]
 
 
@@ -92,7 +111,10 @@ def main():
     t0 = time.time()
     d = load()
     tr, te = split(d)
+    # thresholds are chosen on a validation split carved from TRAIN; the test set is only scored
+    tr, va = train_test_split(tr, test_size=0.15, stratify=tr.source + tr.cls, random_state=1)
     print("train:", tr.groupby(["source", "cls"]).size().to_dict())
+    print("validation:", len(va))
     print("test: ", te.groupby(["source", "cls"]).size().to_dict())
 
     vec = FeatureUnion([
@@ -122,9 +144,12 @@ def main():
     eng_model = json.load(open(path, encoding="utf-8"))
     thresholds_path = ASSETS / "thresholds.json"
     thresholds = json.load(open(thresholds_path))
-    thr_s = threshold_for_precision(te.y.values, p_sk, 0.90)
-    thr_d = max(threshold_for_precision(te.y.values, p_sk, 0.98), thr_s)
-    thresholds["sms"] = {"suspicious": thr_s, "dangerous": thr_d, "rule": "precision >= 0.90 / 0.98 on held-out test"}
+    p_va = clf.predict_proba(vec.transform(va.norm))[:, 1]
+    # template-generated rows are too easy to set a threshold on; use the real/hand-written ones
+    real = (va.source != "india_hf").values
+    thr_s = threshold_for_precision(va.y.values[real], p_va[real], 0.90)
+    thr_d = max(threshold_for_precision(va.y.values[real], p_va[real], 0.98), thr_s)
+    thresholds["sms"] = {"suspicious": thr_s, "dangerous": thr_d, "rule": "precision >= 0.90 / 0.98 on validation messages from UCI + our Indian set (not the test set)"}
     json.dump(thresholds, open(thresholds_path, "w"), indent=2)
 
     from link_engine import LinkEngine
@@ -141,9 +166,10 @@ def main():
     res = {"generated": time.strftime("%Y-%m-%d"), "thresholds": thresholds["sms"],
            "model_bytes": path.stat().st_size, "vocab": {"word": nw, "char": len(c.vocabulary_)},
            "datasets": {"uci": "UCI SMS Spam Collection (spam treated as scam)",
+                        "india_hf": "CloveAI/india-spam-sms (MIT), split by template, max 5 rows per template",
                         "india_synthetic": "ml/sms_india_synthetic.tsv, hand-written, all synthetic"},
            "model_only": {}, "engine": {}, "engine_promotional_fpr": None}
-    for src in ("all", "uci", "india_synthetic"):
+    for src in ("all", "uci", "india_hf", "india_synthetic"):
         m = np.ones(len(te), bool) if src == "all" else (te.source == src).values
         res["model_only"][src] = metrics(y[m], p_sk[m] >= thr_s)
         res["engine"][src] = metrics(y[m], np.isin(lv[m], ["SUSPICIOUS", "DANGEROUS"]))

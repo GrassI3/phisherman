@@ -1,0 +1,322 @@
+{
+  "generated": "2026-10-29",
+  "model": "TF-IDF word 1-2 + char_wb 3-5, logistic regression",
+  "thresholds": {
+    "suspicious": 0.8156192616003309,
+    "dangerous": 0.8741935414622138,
+    "min_words": 10,
+    "rule": "precision >= 0.95 / 0.99 on validation calls (not the test set)"
+  },
+  "model_bytes": 1659773,
+  "train_calls": 13658,
+  "validation_calls": 2452,
+  "datasets": {
+    "bothbosu": "BothBosu/scam-dialogue (English, synthetic), caller turns",
+    "ysangam": "Indian Cyber Scam PhoneCall Hinglish (unique snippets, split by template)",
+    "scripts": "assets/voice_scripts.tsv, hand-written Indian calls, never trained on"
+  },
+  "test": {
+    "calls": {
+      "alert": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "fdr": 1.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 1.0,
+        "n": 3090,
+        "scams": 261,
+        "tp": 261,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2829
+      },
+      "red": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "fdr": 1.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 1.0,
+        "n": 3090,
+        "scams": 261,
+        "tp": 261,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2829
+      }
+    },
+    "bothbosu": {
+      "alert": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "fdr": 1.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 1.0,
+        "n": 310,
+        "scams": 153,
+        "tp": 153,
+        "fp": 0,
+        "fn": 0,
+        "tn": 157
+      },
+      "red": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "fdr": 1.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 1.0,
+        "n": 310,
+        "scams": 153,
+        "tp": 153,
+        "fp": 0,
+        "fn": 0,
+        "tn": 157
+      }
+    },
+    "ysangam": {
+      "alert": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "fdr": 1.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 1.0,
+        "n": 135,
+        "scams": 108,
+        "tp": 108,
+        "fp": 0,
+        "fn": 0,
+        "tn": 27
+      },
+      "red": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "fdr": 1.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 1.0,
+        "n": 135,
+        "scams": 108,
+        "tp": 108,
+        "fp": 0,
+        "fn": 0,
+        "tn": 27
+      }
+    },
+    "dailydialog": {
+      "alert": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "fdr": 0.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 0.0,
+        "n": 2645,
+        "scams": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2645
+      },
+      "red": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "fdr": 0.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 0.0,
+        "n": 2645,
+        "scams": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2645
+      }
+    },
+    "uci_ham": {
+      "alert": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "fdr": 0.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 0.0,
+        "n": 861,
+        "scams": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 861
+      },
+      "red": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "fdr": 0.0,
+        "accuracy": 1.0,
+        "fpr": 0.0,
+        "f1": 0.0,
+        "n": 861,
+        "scams": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 861
+      }
+    },
+    "india_sms": {
+      "alert": {
+        "precision": 0.75,
+        "recall": 0.1875,
+        "fdr": 0.1875,
+        "accuracy": 0.5172,
+        "fpr": 0.0769,
+        "f1": 0.3,
+        "n": 29,
+        "scams": 16,
+        "tp": 3,
+        "fp": 1,
+        "fn": 13,
+        "tn": 12
+      },
+      "red": {
+        "precision": 0.75,
+        "recall": 0.1875,
+        "fdr": 0.1875,
+        "accuracy": 0.5172,
+        "fpr": 0.0769,
+        "f1": 0.3,
+        "n": 29,
+        "scams": 16,
+        "tp": 3,
+        "fp": 1,
+        "fn": 13,
+        "tn": 12
+      }
+    },
+    "scripts": {
+      "alert": {
+        "precision": 1.0,
+        "recall": 0.8571,
+        "fdr": 0.8571,
+        "accuracy": 0.9444,
+        "fpr": 0.0,
+        "f1": 0.9231,
+        "n": 18,
+        "scams": 7,
+        "tp": 6,
+        "fp": 0,
+        "fn": 1,
+        "tn": 11
+      },
+      "red": {
+        "precision": 1.0,
+        "recall": 0.8571,
+        "fdr": 0.8571,
+        "accuracy": 0.9444,
+        "fpr": 0.0,
+        "f1": 0.9231,
+        "n": 18,
+        "scams": 7,
+        "tp": 6,
+        "fp": 0,
+        "fn": 1,
+        "tn": 11
+      }
+    }
+  },
+  "scripts_detail": [
+    {
+      "id": "V1",
+      "kind": "scam",
+      "peak": 0.915
+    },
+    {
+      "id": "V2",
+      "kind": "normal",
+      "peak": 0.665
+    },
+    {
+      "id": "V3",
+      "kind": "care",
+      "peak": 0.375
+    },
+    {
+      "id": "S1",
+      "kind": "scam",
+      "peak": 0.999
+    },
+    {
+      "id": "S2",
+      "kind": "scam",
+      "peak": 0.988
+    },
+    {
+      "id": "S3",
+      "kind": "scam",
+      "peak": 0.997
+    },
+    {
+      "id": "S4",
+      "kind": "scam",
+      "peak": 0.762
+    },
+    {
+      "id": "S5",
+      "kind": "scam",
+      "peak": 0.961
+    },
+    {
+      "id": "S6",
+      "kind": "scam",
+      "peak": 0.995
+    },
+    {
+      "id": "N1",
+      "kind": "normal",
+      "peak": 0.163
+    },
+    {
+      "id": "N2",
+      "kind": "normal",
+      "peak": 0.688
+    },
+    {
+      "id": "N3",
+      "kind": "normal",
+      "peak": 0.175
+    },
+    {
+      "id": "N4",
+      "kind": "normal",
+      "peak": 0.021
+    },
+    {
+      "id": "N5",
+      "kind": "normal",
+      "peak": 0.57
+    },
+    {
+      "id": "G1",
+      "kind": "care",
+      "peak": 0.377
+    },
+    {
+      "id": "G2",
+      "kind": "care",
+      "peak": 0.373
+    },
+    {
+      "id": "G3",
+      "kind": "care",
+      "peak": 0.644
+    },
+    {
+      "id": "N6",
+      "kind": "care",
+      "peak": 0.246
+    }
+  ]
+}

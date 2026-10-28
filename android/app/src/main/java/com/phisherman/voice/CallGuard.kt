@@ -46,6 +46,7 @@ object CallGuard {
 
     @Volatile var judge: ContextJudge? = null
     private var rules: VoiceRules? = null
+    private var model: CallModel? = null
     private var session: CallSession? = null
     private var lastLlmAt = 0L
     private var llmJob: Job? = null
@@ -53,10 +54,16 @@ object CallGuard {
     fun rules(ctx: Context): VoiceRules = rules ?: VoiceRules(
         ctx.assets.open("voice_rules.json").bufferedReader().use { it.readText() }).also { rules = it }
 
+    /** The trained call model; null (rules only) if it fails to load. */
+    fun model(ctx: Context): CallModel? = model ?: runCatching {
+        fun text(name: String) = ctx.assets.open(name).bufferedReader().use { it.readText() }
+        CallModel.load(text("call_model.json"), text("thresholds.json"))
+    }.onFailure { android.util.Log.e("CallGuard", "call model not loaded", it) }.getOrNull().also { model = it }
+
     @Synchronized
     fun begin(ctx: Context, mode: GuardMode) {
         if (_state.value.mode != GuardMode.OFF) end(ctx)
-        session = CallSession(rules(ctx))
+        session = CallSession(rules(ctx), model(ctx))
         lastLlmAt = 0L
         _state.value = GuardState(mode = mode, lastSummary = null)
     }
@@ -191,7 +198,11 @@ object CallGuard {
 
     fun reasonsFor(ctx: Context, ids: List<String>): List<Reason> {
         val r = rules(ctx)
-        return ids.mapNotNull { id -> r.categories.firstOrNull { it.id == id } }
+        val fromRules = ids.mapNotNull { id -> r.categories.firstOrNull { it.id == id } }
             .sortedByDescending { it.weight }.map { Reason(it.id, it.en, it.hi) }
+        val fromModel = if (CallModel.ID in ids) listOf(Reason(CallModel.ID,
+            "This call sounds like known scam calls",
+            "यह कॉल जानी-पहचानी धोखाधड़ी वाली कॉल जैसी लगती है")) else emptyList()
+        return fromRules + fromModel
     }
 }

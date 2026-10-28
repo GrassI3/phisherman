@@ -1,6 +1,7 @@
 package com.phisherman
 
 import com.phisherman.engine.Level
+import com.phisherman.voice.CallModel
 import com.phisherman.voice.CallSession
 import com.phisherman.voice.Judgement
 import com.phisherman.voice.VoiceRules
@@ -13,6 +14,8 @@ import java.io.File
 /** PS4 13.4 P4: scam scripts reach red before the payment demand; normal calls never reach red. */
 class VoiceScorerTest {
     private val rules = VoiceRules(File("src/main/assets/voice_rules.json").readText())
+    private val model = CallModel.load(File("src/main/assets/call_model.json").readText(),
+        File("src/main/assets/thresholds.json").readText())
 
     private data class Script(val id: String, val kind: String, val lines: List<String>)
 
@@ -22,7 +25,7 @@ class VoiceScorerTest {
     /** Feed lines 8 s apart, like a real call; returns the level after each line. */
     private fun play(s: Script): List<Level> {
         var t = 0L
-        val session = CallSession(rules) { t }
+        val session = CallSession(rules, model) { t }
         return s.lines.map { line ->
             t += 8_000
             session.addFinal(line.removePrefix("[PAY] "))
@@ -111,5 +114,18 @@ class VoiceScorerTest {
         assertEquals(Level.SUSPICIOUS, s3.update().level)
         s3.applyJudgement(Judgement(Level.DANGEROUS, "credential_request"))
         assertEquals(Level.DANGEROUS, s3.update().level)
+    }
+
+    /** call_model.json scored in Kotlin matches ml/train_calls.py (same scorer as the SMS model). */
+    @Test
+    fun callModelMatchesPython() {
+        val sms = com.phisherman.sms.SmsModel(File("src/main/assets/call_model.json").readText())
+        val rows = javaClass.classLoader!!.getResource("call_parity_expected.tsv")!!.readText(Charsets.UTF_8)
+            .lines().drop(1).filter { it.isNotBlank() }.map { it.split("	") }
+        assertTrue(rows.size >= 10)
+        for ((text, expected) in rows) {
+            val p = sms.prob(com.phisherman.sms.SmsNormalizer.normalize(text).text)
+            assertEquals(text, expected.toDouble(), p, 1e-6)
+        }
     }
 }

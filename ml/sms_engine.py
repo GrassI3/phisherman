@@ -29,6 +29,9 @@ ASK_RE = re.compile(f"{A}{ASK}{Z}[^.!?]{{0,40}}?{A}{CRED}{Z}")
 HI_ASK_RE = re.compile(f"{A}{CRED}{Z}[^.!?]{{0,30}}?{A}(?:batao|bhejo|share karo|share karein|share kare|de do|dijiye|bata do){Z}")
 NEGATION_RE = re.compile(f"{A}(?:not|never|don't|dont|mat|na|nahi|no one){Z}")
 
+# an Android app file sent as a message / attachment, e.g. "KYC_Update.apk" or disguised "Form.pdf.apk"
+APK_FILE_RE = re.compile(r"[a-z0-9_()\-.]+\.(?:apk|xapk|apks|apkm)(?![a-z0-9])")
+APK_DISGUISED_RE = re.compile(r"\.(?:pdf|jpe?g|png|docx?|xlsx?|mp4|txt)\.(?:apk|xapk|apks|apkm)(?![a-z0-9])")
 REMOTE_APPS_RE = re.compile(f"{A}(?:anydesk|teamviewer|quicksupport|quick support|rustdesk|airdroid){Z}")
 INSTALL_APP_RE = re.compile(f"{A}(?:install|download){Z}[^.!?]{{0,50}}?{A}(?:app|apk|application){Z}")
 
@@ -109,6 +112,8 @@ class SmsEngine:
 
         if _asks(ASK_RE, norm) or _asks(HI_ASK_RE, norm):
             hits.append("R_OTP_ASK"); level = 2
+        if APK_FILE_RE.search(norm):
+            hits.append("R_APK_FILE"); level = 2
         if (REMOTE_APPS_RE.search(norm) or ".apk" in " ".join(urls)
                 or (INSTALL_APP_RE.search(norm) and link_level is not None and link_level > 0)):
             hits.append("R_APP_INSTALL"); level = 2
@@ -124,7 +129,7 @@ class SmsEngine:
             hits.append("LINK")
         links_safe = not urls or link_level == 0
         if ((HEADER_RE.match(sender) or trusted_sender) and links_safe
-                and not {"R_OTP_ASK", "R_APP_INSTALL", "R_BRAND_LINK"} & set(hits)):
+                and not {"R_OTP_ASK", "R_APP_INSTALL", "R_BRAND_LINK", "R_APK_FILE"} & set(hits)):
             if level > 0:
                 hits.append("R_ALLOW_SENDER")
             level = 0

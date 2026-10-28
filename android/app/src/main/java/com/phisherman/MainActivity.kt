@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -337,6 +338,11 @@ private fun QuickCheck() {
     var input by remember { mutableStateOf("") }
     var result by remember { mutableStateOf<Pair<String, Verdict?>?>(null) }
     var checking by remember { mutableStateOf(false) }
+    // looks inside the file, so an app renamed to .pdf / .jpg is still caught
+    val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) ctx.startActivity(Intent(ctx, com.phisherman.ui.FileCheckActivity::class.java)
+            .setData(uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+    }
     Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             OutlinedTextField(input, { input = it; result = null }, Modifier.fillMaxWidth(),
@@ -364,6 +370,8 @@ private fun QuickCheck() {
                     }
                 },
             ) { Text(if (checking) "Checking…" else "Check") }
+            androidx.compose.material3.OutlinedButton(onClick = { pickFile.launch(arrayOf("*/*")) },
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) { Text("Check a file (hidden apps / APKs)") }
             result?.let { (url, v) ->
                 when {
                     v == null -> Text("That is not a web link (http or https).", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -436,5 +444,5 @@ private fun SettingsSection() {
 
 private fun levelColor(level: String) = when (level) { "DANGEROUS" -> Brand.Danger; "SUSPICIOUS" -> Brand.Warn; else -> Brand.Safe }
 private fun levelLabel(level: String) = when (level) { "DANGEROUS" -> "Dangerous"; "SUSPICIOUS" -> "Suspicious"; else -> "Safe" }
-private fun channelLabel(c: String) = when (c) { "LINK" -> "Link"; "SMS" -> "Message"; "VOICE" -> "Call"; else -> c }
+private fun channelLabel(c: String) = when (c) { "LINK" -> "Link"; "SMS" -> "Message"; "VOICE" -> "Call"; "FILE" -> "File"; else -> c }
 private fun actionLabel(a: String) = when (a) { "BACK" -> "went back"; "OPEN_ANYWAY" -> "opened anyway"; "FORWARDED" -> "opened"; else -> a.lowercase() }

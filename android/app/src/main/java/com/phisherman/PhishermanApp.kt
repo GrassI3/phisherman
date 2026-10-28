@@ -29,6 +29,7 @@ class PhishermanApp : Application() {
         // load the models early so the first link tap or SMS is fast
         scope.launch {
             SmsAnalyser.init(this@PhishermanApp)
+            CallGuard.model(this@PhishermanApp)
             // the on-device LLM is optional: when its file is bundled and loads, it becomes the
             // second opinion for chats and the call guard
             if (ScamLlm.available(this@PhishermanApp) && ScamLlm.init(this@PhishermanApp)) CallGuard.judge = ScamLlm
