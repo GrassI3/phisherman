@@ -15,7 +15,8 @@ from link_engine import LinkEngine
 from train_link import load_train_sources
 
 ML = Path(__file__).resolve().parent
-KOTLIN_TEST_RES = ML.parent / "android/app/src/test/resources"
+KOTLIN_TEST_DIRS = [ML.parent / "android/app/src/test/resources",   # JVM unit test (features)
+                    ML.parent / "android/app/src/androidTest/assets"]  # on-device test (model + engine)
 
 
 def read_lines(path):
@@ -26,14 +27,16 @@ def write_parity(e):
     rows = []
     for u in read_lines(ML / "parity_urls.txt"):
         f = features(u, e.brands)
-        rows.append([u] + [repr(float(v)) for v in f] + [repr(e.prob(u))])
+        level, reason, _ = e.decide(u)
+        rows.append([u] + [repr(float(v)) for v in f] + [repr(e.prob(u)), level or "IGNORED", reason])
     out = ML / "parity_expected.csv"
     with open(out, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
-        w.writerow(["url"] + FEATURE_NAMES + ["prob"])
+        w.writerow(["url"] + FEATURE_NAMES + ["prob", "level", "reason"])
         w.writerows(rows)
-    KOTLIN_TEST_RES.mkdir(parents=True, exist_ok=True)
-    shutil.copy(out, KOTLIN_TEST_RES / "parity_expected.csv")
+    for d in KOTLIN_TEST_DIRS:
+        d.mkdir(parents=True, exist_ok=True)
+        shutil.copy(out, d / "parity_expected.csv")
     return len(rows)
 
 

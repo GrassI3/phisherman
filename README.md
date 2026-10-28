@@ -85,6 +85,34 @@ What these numbers mean:
 - **The model alone over-flags real login pages** (GitHub, Microsoft sign-in, Google Forms) because the training benign data has few login pages. The allowlist removes these false alarms on major sites; long-tail legitimate login pages remain a known weakness.
 - Thresholds are chosen on the held-out test set for precision ≥ 0.90 (suspicious) and ≥ 0.98 (dangerous).
 
+## Android app: link protection (Phase 2)
+
+How it works on the phone:
+1. Phisherman is set as the phone's browser app ("Turn on link protection" on the home screen). Links can also be shared to Phisherman, or pasted into the home-screen box.
+2. `LinkRouterActivity` (invisible) receives the tap, scores it on device, and either forwards a safe link to the real browser (Chrome by default, changeable on the home screen) or opens `WarningActivity`.
+3. The warning shows the real registrable domain in bold, a 0–100 risk meter, up to three reasons (English / Hindi), a dominant **Go back** button, **Report this link** (Phase 5), and a small **Open anyway** that needs a second confirmation.
+4. Every verdict goes to a local Room log (time, level, score, host, reason ids, latency, user action). No message text or full URL is stored.
+
+Code: `link/UrlParser.kt`, `UrlFeatures.kt` (Kotlin twin of `features.py`), `Blocklist.kt`, `LinkDecider.kt` (twin of `link_engine.py`), `LinkReasons.kt`, `LinkAnalyser.kt` (assets, ONNX, cache, fail-safe), `LinkRouterActivity.kt`, `Forwarder.kt`, `ui/WarningActivity.kt`, `data/Decision.kt`.
+
+Tests:
+
+```
+cd android
+.\gradlew testDebugUnitTest            # JVM: 19 features within 1e-4 of Python on 30 URLs, Bloom filter, rule decisions
+.\gradlew connectedDebugAndroidTest    # on the phone: ONNX probability within 0.01 of Python, same level + reason for all 30
+```
+
+Results on the demo phone (S21 FE, Android 14), 2026-10-28:
+
+| Check | Result |
+|---|---|
+| JVM parity (features, blocklist, rules) | 3 / 3 tests pass |
+| On-device parity (ONNX + engine, 30 URLs) | pass |
+| Device links via a real VIEW intent | L1–L5 and L9 warn, L6–L7 forwarded to Chrome (L8 and L10 checked in the parity tests; `tel:` never reaches Phisherman because it only registers for http/https) |
+| Scoring latency (decision log) | median 2 ms, max 110 ms (first call after load) |
+| Tap-to-screen time (`am start -W`) | ~150–400 ms, warning or forward |
+
 ## External dependencies
 
 ### Toolchain

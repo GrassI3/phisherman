@@ -29,5 +29,11 @@
     "npci": ["npci.org.in"],
     "bhim": ["bhimupi.org.in", "npci.org.in"]
   },
+  "names": {
+    "sbi": "SBI", "onlinesbi": "SBI", "hdfc": "HDFC Bank", "icici": "ICICI Bank", "axisbank": "Axis Bank",
+    "kotak": "Kotak Bank", "paytm": "Paytm", "phonepe": "PhonePe", "gpay": "Google Pay", "amazon": "Amazon",
+    "flipkart": "Flipkart", "irctc": "IRCTC", "indiapost": "India Post", "incometax": "Income Tax Dept",
+    "uidai": "UIDAI (Aadhaar)", "aadhaar": "Aadhaar", "npci": "NPCI", "bhim": "BHIM UPI"
+  },
   "homoglyphs": { "0": "o", "1": "l", "3": "e", "5": "s", "rn": "m", "vv": "w" }
 }
