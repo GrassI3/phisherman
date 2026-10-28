@@ -11,7 +11,7 @@ FNV_PRIME = 0x100000001B3
 MASK64 = 0xFFFFFFFFFFFFFFFF
 SEED2 = 0x9E3779B97F4A7C15
 
-
+## hello my name is rushikesh gaonkar i dont know how i have access to this repository but i have it i dont know what even i am doing 
 def fnv1a64(data, seed=FNV_OFFSET):
     h = seed
     for b in data:
