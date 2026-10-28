@@ -1,5 +1,8 @@
 package com.phisherman
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.os.PowerManager
 import android.app.role.RoleManager
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -48,7 +51,12 @@ import com.phisherman.data.Prefs
 import com.phisherman.engine.Level
 import com.phisherman.engine.Verdict
 import com.phisherman.link.Forwarder
+import androidx.core.content.ContextCompat
 import com.phisherman.link.LinkAnalyser
+import android.content.ComponentName
+import com.phisherman.sms.MessageNotificationListener
+import com.phisherman.sms.SmsAnalyser
+import com.phisherman.voice.CallGuardActivity
 import com.phisherman.ui.WarningActivity
 import com.phisherman.ui.theme.PhishermanTheme
 import kotlinx.coroutines.launch
@@ -57,9 +65,15 @@ import java.util.Date
 
 class MainActivity : ComponentActivity() {
     private var protectionOn by mutableStateOf(false)
+    private var smsOn by mutableStateOf(false)
+    private var chatOn by mutableStateOf(false)
+    private var batteryOk by mutableStateOf(true)
 
     private val roleRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         protectionOn = isLinkHandler()
+    }
+    private val smsPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        smsOn = hasSmsProtection()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +88,12 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(inner),
                         protectionOn = protectionOn,
                         onTurnOn = ::requestLinkHandler,
+                        smsOn = smsOn,
+                        onTurnOnSms = ::requestSmsProtection,
+                        chatOn = chatOn,
+                        onTurnOnChat = ::openListenerSettings,
+                        batteryOk = batteryOk,
+                        onFixBattery = ::requestBatteryExemption,
                         decisions = decisions,
                     )
                 }
@@ -84,6 +104,42 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         protectionOn = isLinkHandler()
+        smsOn = hasSmsProtection()
+        chatOn = MessageNotificationListener.isEnabled(this)
+        batteryOk = getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
+    }
+
+    @SuppressLint("BatteryLife")  // a security app must keep checking messages in the background
+    private fun requestBatteryExemption() {
+        try {
+            startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName")))
+        } catch (e: Exception) {
+            startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+        }
+    }
+
+    private fun openListenerSettings() {
+        val component = ComponentName(this, MessageNotificationListener::class.java)
+        val detail = if (Build.VERSION.SDK_INT >= 30) {
+            Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
+                .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, component.flattenToString())
+        } else null
+        try {
+            startActivity(detail ?: Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        } catch (e: Exception) {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+    }
+
+    private fun granted(p: String) = ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED
+
+    private fun hasSmsProtection(): Boolean =
+        granted(Manifest.permission.RECEIVE_SMS) && (Build.VERSION.SDK_INT < 33 || granted(Manifest.permission.POST_NOTIFICATIONS))
+
+    private fun requestSmsProtection() {
+        val perms = mutableListOf(Manifest.permission.RECEIVE_SMS)
+        if (Build.VERSION.SDK_INT >= 33) perms += Manifest.permission.POST_NOTIFICATIONS
+        smsPermissions.launch(perms.toTypedArray())
     }
 
     private fun isLinkHandler(): Boolean {
@@ -112,6 +168,12 @@ private fun HomeScreen(
     modifier: Modifier,
     protectionOn: Boolean,
     onTurnOn: () -> Unit,
+    smsOn: Boolean,
+    onTurnOnSms: () -> Unit,
+    chatOn: Boolean,
+    onTurnOnChat: () -> Unit,
+    batteryOk: Boolean,
+    onFixBattery: () -> Unit,
     decisions: List<Decision>,
 ) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
@@ -140,24 +202,63 @@ private fun HomeScreen(
             }
         }
 
+        if (smsOn) {
+            StatusCard(Color(0xFF1B6E3A), "SMS protection is ON", "New messages are checked as they arrive. Risky ones get a warning notification.")
+        } else {
+            StatusCard(Color(0xFFB26A00), "SMS protection is OFF", "Allow Phisherman to see incoming SMS and show notifications. Messages are checked on this phone and never uploaded.") {
+                Button(onClick = onTurnOnSms) { Text("Turn on SMS protection") }
+            }
+        }
+
+        if (chatOn) {
+            StatusCard(Color(0xFF1B6E3A), "App notification protection is ON", "New notifications from every app (RCS chats, WhatsApp, Instagram, Gmail and more) are checked on this phone.")
+        } else {
+            StatusCard(Color(0xFFB26A00), "App notification protection is OFF",
+                "Scams arrive as RCS chats, WhatsApp, Instagram DMs and emails, not only SMS. Allow Phisherman to read notifications so it can check them. Text is checked on this phone and never stored.") {
+                Button(onClick = onTurnOnChat) { Text("Turn on chat protection") }
+            }
+        }
+
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Check a link", fontWeight = FontWeight.SemiBold)
+                Text("Call guard", fontWeight = FontWeight.SemiBold)
+                Text("Listens to a call on speaker and warns you, with strong vibration, when it sounds like a scam. Works offline; nothing is recorded.")
+                Button(onClick = { ctx.startActivity(Intent(ctx, CallGuardActivity::class.java)) }) { Text("Open call guard") }
+            }
+        }
+
+        if ((smsOn || chatOn) && !batteryOk) {
+            StatusCard(Color(0xFFB26A00), "Keep protection running",
+                "Your phone may put Phisherman to sleep in the background, and then messages are not checked until you open the app. Allow it to run without battery restrictions. On Samsung also check Settings > Battery > Background usage limits.") {
+                Button(onClick = onFixBattery) { Text("Allow background checking") }
+            }
+        }
+
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Check a link or message", fontWeight = FontWeight.SemiBold)
                 OutlinedTextField(input, { input = it; result = null }, Modifier.fillMaxWidth(),
-                    placeholder = { Text("Paste a link") }, singleLine = true)
+                    placeholder = { Text("Paste a link or a whole SMS") }, minLines = 1, maxLines = 6)
                 Button(
                     enabled = input.isNotBlank() && !checking,
                     onClick = {
                         checking = true
                         scope.launch {
-                            val v = LinkAnalyser.analyse(ctx, input)
+                            val text = input.trim()
+                            // one token with a dot = a link; anything else is checked as a message
+                            val isLink = text.none { it.isWhitespace() } && '.' in text
+                            val v = if (isLink) LinkAnalyser.analyse(ctx, text) else SmsAnalyser.analyse(ctx, null, text)
                             checking = false
-                            if (v != null && v.level != Level.SAFE) {
-                                ctx.startActivity(WarningActivity.intent(ctx, input.trim(), v))
-                            } else if (v != null) {
-                                DecisionLog.recordAsync(ctx, v)
+                            when {
+                                v == null -> {}
+                                v.level == Level.SAFE -> DecisionLog.recordAsync(ctx, v)
+                                isLink -> ctx.startActivity(WarningActivity.intent(ctx, text, v))
+                                else -> {
+                                    DecisionLog.recordAsync(ctx, v)
+                                    ctx.startActivity(WarningActivity.smsIntent(ctx, text, v))
+                                }
                             }
-                            result = input to v
+                            result = (if (isLink) text else "") to v
                         }
                     },
                 ) { Text(if (checking) "Checking…" else "Check") }
@@ -167,7 +268,7 @@ private fun HomeScreen(
                         v.level == Level.SAFE -> {
                             Text("✓ Looks safe · risk ${v.score}/100 · ${v.latencyMs} ms", color = Color(0xFF1B6E3A), fontWeight = FontWeight.SemiBold)
                             v.reasons.firstOrNull()?.let { Text(it.textEn) }
-                            OutlinedButton(onClick = { Forwarder.openInRealBrowser(ctx, url.trim()) }) { Text("Open") }
+                            if (url.isNotEmpty()) OutlinedButton(onClick = { Forwarder.openInRealBrowser(ctx, url) }) { Text("Open") }
                         }
                         else -> Text("⚠ ${v.level.name.lowercase()} · risk ${v.score}/100 · ${v.latencyMs} ms", color = Color(0xFFB3261E), fontWeight = FontWeight.SemiBold)
                     }

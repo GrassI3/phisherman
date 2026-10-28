@@ -19,7 +19,7 @@ class LinkModelDeviceTest {
         val app = inst.targetContext
         val csv = inst.context.assets.open("parity_expected.csv").bufferedReader().use { it.readText() }
         val rows = csv.lineSequence().drop(1).filter { it.isNotBlank() }.map { splitCsv(it) }.toList()
-        assertTrue(rows.size == 30)
+        assertTrue(rows.size >= 30)
 
         LinkAnalyser.init(app)
         assertNull("engine failed to load: ${LinkAnalyser.loadError}", LinkAnalyser.loadError)

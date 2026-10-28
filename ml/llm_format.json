@@ -1,0 +1,24 @@
+{
+  "labels": [
+    "SAFE",
+    "SUSPICIOUS",
+    "SCAM"
+  ],
+  "reasons": [
+    "none",
+    "promo",
+    "credential_request",
+    "payment_request",
+    "authority_impersonation",
+    "threat_urgency",
+    "prize_lottery",
+    "job_investment",
+    "remote_access",
+    "family_impersonation",
+    "secrecy",
+    "link_lure",
+    "other_scam"
+  ],
+  "prompt_prefix": "<start_of_turn>user\n",
+  "prompt_suffix": "<end_of_turn>\n<start_of_turn>model\n"
+}

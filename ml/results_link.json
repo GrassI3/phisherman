@@ -179,7 +179,7 @@
   ],
   "onnx_bytes": 10925328,
   "extras": {
-    "parity_urls": 30,
+    "parity_urls": 33,
     "hard_negatives": {
       "n": 40,
       "fpr_model_only": 0.375,
@@ -357,9 +357,9 @@
     ],
     "unseen_engine_sample": {
       "model_only_suspicious": {
-        "precision": 0.9786,
-        "recall": 0.3168,
-        "fpr": 0.0036,
+        "precision": 0.9778,
+        "recall": 0.3189,
+        "fpr": 0.0038,
         "n": 40000
       },
       "model_only_dangerous": {
@@ -369,9 +369,9 @@
         "n": 40000
       },
       "engine_suspicious": {
-        "precision": 0.9748,
-        "recall": 0.354,
-        "fpr": 0.0047,
+        "precision": 0.9742,
+        "recall": 0.3561,
+        "fpr": 0.0049,
         "n": 40000
       },
       "engine_dangerous": {

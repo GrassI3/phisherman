@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only: lets adb inject a test SMS into the same pipeline as a real one.
+     adb shell am broadcast -n com.phisherman/.sms.DebugSmsReceiver -a com.phisherman.debug.FAKE_SMS -e sender 9876543210 -e body "text" -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <receiver
+            android:name=".sms.DebugSmsReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.phisherman.debug.FAKE_SMS" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

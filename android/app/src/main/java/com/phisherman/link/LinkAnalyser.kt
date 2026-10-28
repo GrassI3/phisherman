@@ -95,6 +95,19 @@ object LinkAnalyser {
         return v
     }
 
+    /** Synchronous scoring for callers already off the main thread (SMS engine). Call init first. */
+    fun decideNow(url: String): Verdict? {
+        val key = url.trim()
+        synchronized(cache) { cache[key] }?.let { return it }
+        val d = decider ?: return failOpen(key)
+        val v = try { d.decide(key) } catch (e: Throwable) { failOpen(key) } ?: return null
+        synchronized(cache) { cache[key] = v }
+        return v
+    }
+
+    /** Shared config (brands, suffix lists) for other analysers. Null until init succeeds. */
+    fun config(): LinkConfig? = config
+
     /** A broken model must never silently pass a link: warn with a clear reason instead. */
     private fun failOpen(url: String) = Verdict(
         Channel.LINK, 50, Level.SUSPICIOUS,

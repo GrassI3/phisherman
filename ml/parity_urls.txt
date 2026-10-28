@@ -30,3 +30,6 @@ https://example.com/%6Cogin?a=1&b=2&c=
 https://www.google.com/maps/search/railway+station+near+connaught+place/@28.6315,77.2167,15z?entry=ttu
 https://a0724127.xsph.ru/
 https://example.com/user@mail
+http://sbi-kyc.example
+https://hdfcbnk-login.example/
+https://him.example/

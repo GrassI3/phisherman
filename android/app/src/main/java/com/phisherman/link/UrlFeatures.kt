@@ -32,6 +32,9 @@ class LinkConfig(featureOrderJson: String, brandsJson: String) {
         br["homoglyphs"]!!.jsonObject.entries.map { it.key to it.value.jsonPrimitive.content }
             .sortedByDescending { it.first.length }
 
+    /** Brand tokens plus the first label of each official domain, sorted (link_engine.brand_names). */
+    val brandHostNames: List<String> = (brandTokens + official.map { it.substringBefore('.') }).toSortedSet().toList()
+
     init {
         check(featureNames.size == UrlFeatures.SIZE) { "feature_order.json has ${featureNames.size} features, app expects ${UrlFeatures.SIZE}" }
         check(version == UrlFeatures.VERSION) { "feature_order.json is $version, app expects ${UrlFeatures.VERSION}" }
@@ -117,6 +120,21 @@ object UrlFeatures {
         if (reg.isEmpty() || label.isEmpty()) return null
         return cfg.brandTokens.map { t -> t to lev(label, t).toDouble() / maxOf(label.length, t.length) }
             .minByOrNull { it.second }
+    }
+
+    /**
+     * Brand name a lookalike host uses (sbi-kyc.example -> "sbi"), or null. Twin of
+     * link_engine.brand_in_host: any host part equal to a brand name, or one edit away if 5+ chars.
+     */
+    fun brandInHost(host: String, reg: String, cfg: LinkConfig): String? {
+        if (host.isEmpty() || reg in cfg.official) return null
+        for (part in host.split('.', '-')) {
+            val p = deglyph(part, cfg)
+            for (n in cfg.brandHostNames) {
+                if (p == n || (p.length >= 5 && lev(p, n) <= 1)) return n
+            }
+        }
+        return null
     }
 
     fun compute(url: String, cfg: LinkConfig): FloatArray = compute(url, parse(url, cfg), cfg)

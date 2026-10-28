@@ -1,0 +1,541 @@
+{
+  "generated": "2026-10-28",
+  "thresholds": {
+    "suspicious": 0.39361915166851497,
+    "dangerous": 0.6974903322499564,
+    "rule": "precision >= 0.90 / 0.98 on held-out test"
+  },
+  "model_bytes": 994465,
+  "vocab": {
+    "word": 10076,
+    "char": 21158
+  },
+  "datasets": {
+    "uci": "UCI SMS Spam Collection (spam treated as scam)",
+    "india_synthetic": "ml/sms_india_synthetic.tsv, hand-written, all synthetic"
+  },
+  "model_only": {
+    "all": {
+      "precision": 0.902,
+      "recall": 0.965,
+      "fdr": 0.965,
+      "fpr": 0.0161,
+      "f1": 0.9324,
+      "n": 1077,
+      "n_phishing": 143,
+      "tp": 138,
+      "fp": 15,
+      "fn": 5,
+      "tn": 919
+    },
+    "uci": {
+      "precision": 0.9453,
+      "recall": 0.968,
+      "fdr": 0.968,
+      "fpr": 0.0077,
+      "f1": 0.9565,
+      "n": 1029,
+      "n_phishing": 125,
+      "tp": 121,
+      "fp": 7,
+      "fn": 4,
+      "tn": 897
+    },
+    "india_synthetic": {
+      "precision": 0.68,
+      "recall": 0.9444,
+      "fdr": 0.9444,
+      "fpr": 0.2667,
+      "f1": 0.7907,
+      "n": 48,
+      "n_phishing": 18,
+      "tp": 17,
+      "fp": 8,
+      "fn": 1,
+      "tn": 22
+    }
+  },
+  "engine": {
+    "all": {
+      "precision": 0.9452,
+      "recall": 0.965,
+      "fdr": 0.965,
+      "fpr": 0.0086,
+      "f1": 0.955,
+      "n": 1077,
+      "n_phishing": 143,
+      "tp": 138,
+      "fp": 8,
+      "fn": 5,
+      "tn": 926
+    },
+    "uci": {
+      "precision": 0.9453,
+      "recall": 0.968,
+      "fdr": 0.968,
+      "fpr": 0.0077,
+      "f1": 0.9565,
+      "n": 1029,
+      "n_phishing": 125,
+      "tp": 121,
+      "fp": 7,
+      "fn": 4,
+      "tn": 897
+    },
+    "india_synthetic": {
+      "precision": 0.9444,
+      "recall": 0.9444,
+      "fdr": 0.9444,
+      "fpr": 0.0333,
+      "f1": 0.9444,
+      "n": 48,
+      "n_phishing": 18,
+      "tp": 17,
+      "fp": 1,
+      "fn": 1,
+      "tn": 29
+    }
+  },
+  "engine_promotional_fpr": {
+    "n": 14,
+    "flagged": 0
+  },
+  "india_test_details": [
+    {
+      "cls": "normal",
+      "sender": "AD-HDFCBK",
+      "text": "EMI of Rs 12,450 for loan a/c XX5678 is due on 05-Nov. Please maintain sufficient balance.",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.092
+    },
+    {
+      "cls": "phishing",
+      "sender": "9090909090",
+      "text": "Dear consumer, your electricity connection will be cut today due to pending bill. Pay now:",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_URGENT_LINK",
+        "R_SENDER_MISMATCH"
+      ],
+      "p": 0.808
+    },
+    {
+      "cls": "phishing",
+      "sender": "9889012346",
+      "text": "PM Kisan: Rs 6000 installment is pending. Update your bank details at http://pmkisan-updat",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_SENDER_MISMATCH"
+      ],
+      "p": 0.948
+    },
+    {
+      "cls": "promo",
+      "sender": "VM-MEESHO",
+      "text": "Meesho Mega Blockbuster Sale: Products starting at Rs 49. Shop on the Meesho app",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.101
+    },
+    {
+      "cls": "normal",
+      "sender": "9876520000",
+      "text": "New song is out https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.116
+    },
+    {
+      "cls": "normal",
+      "sender": "9876507777",
+      "text": "कल सुबह 10 बजे डॉक्टर के पास चलना है, याद रखना",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.026
+    },
+    {
+      "cls": "promo",
+      "sender": "VK-BIGBSK",
+      "text": "bigbasket: Get fresh fruits and vegetables delivered in 30 mins. Use code FRESH50",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.096
+    },
+    {
+      "cls": "phishing",
+      "sender": "9890123458",
+      "text": "Scholarship of Rs 48,000 approved for you. Pay registration fee Rs 499 at http://scholarsh",
+      "level": "DANGEROUS",
+      "hits": [],
+      "p": 0.73
+    },
+    {
+      "cls": "phishing",
+      "sender": "9801234560",
+      "text": "Aapka loan approve ho gaya hai. Processing fee Rs 500 turant bhejiye is UPI ID par: loanhe",
+      "level": "SUSPICIOUS",
+      "hits": [],
+      "p": 0.619
+    },
+    {
+      "cls": "promo",
+      "sender": "AD-ZERODH",
+      "text": "Open a free demat account with Zerodha in 10 minutes. Visit zerodha.com",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.203
+    },
+    {
+      "cls": "promo",
+      "sender": "AD-POLBZR",
+      "text": "Compare and buy term insurance plans on Policybazaar. Plans starting Rs 490/month",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.091
+    },
+    {
+      "cls": "phishing",
+      "sender": "8080808080",
+      "text": "Bijli ka bill pending hai, aaj raat connection kat jayega. Turant is number par call karei",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_SENDER_MISMATCH"
+      ],
+      "p": 0.963
+    },
+    {
+      "cls": "promo",
+      "sender": "VM-ZOMATO",
+      "text": "Weekend special: Free delivery on orders above Rs 199. Order now on Zomato",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.238
+    },
+    {
+      "cls": "normal",
+      "sender": "9876501111",
+      "text": "Mummy main ghar 8 baje tak aa jaunga, khana bana ke rakhna",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.062
+    },
+    {
+      "cls": "phishing",
+      "sender": "9834567892",
+      "text": "Amazon: You won an iPhone 15 in our lucky draw. Pay Rs 99 delivery charge to claim: http:/",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_BRAND_LINK"
+      ],
+      "p": 0.839
+    },
+    {
+      "cls": "promo",
+      "sender": "VM-AIRTEL",
+      "text": "Unlimited 5G data with Airtel Rs 399 plan. Recharge on Airtel Thanks app.",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.03
+    },
+    {
+      "cls": "promo",
+      "sender": "VM-KFCIND",
+      "text": "KFC Bucket deal: 8 pc chicken at Rs 499 today only. Order on the KFC app.",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.043
+    },
+    {
+      "cls": "promo",
+      "sender": "AD-BIGBZR",
+      "text": "Diwali Dhamaka Sale! Extra 20% off on groceries this week at your nearest store.",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.134
+    },
+    {
+      "cls": "normal",
+      "sender": "VM-ICICIB",
+      "text": "Your ICICI Bank FD of Rs 1,00,000 has been renewed for 1 year at 7.1% p.a.",
+      "level": "SAFE",
+      "hits": [
+        "R_ALLOW_SENDER"
+      ],
+      "p": 0.695
+    },
+    {
+      "cls": "phishing",
+      "sender": "7766554433",
+      "text": "Electricity bill unpaid. Your power will be disconnected tonight at 9.30 pm. Call electric",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_SENDER_MISMATCH"
+      ],
+      "p": 0.828
+    },
+    {
+      "cls": "phishing",
+      "sender": "9901234567",
+      "text": "Your account is blocked. Please send the OTP you received to this number to unblock it",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_OTP_ASK"
+      ],
+      "p": 0.894
+    },
+    {
+      "cls": "promo",
+      "sender": "AD-SWIGGY",
+      "text": "Hungry? Get 60% off up to Rs 120 on your next order. Use code TRYNEW. Order on Swiggy",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.187
+    },
+    {
+      "cls": "promo",
+      "sender": "AD-SBICRD",
+      "text": "Shop with SBI Card this festive season and get 10% instant discount on Amazon. T&C apply",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.105
+    },
+    {
+      "cls": "phishing",
+      "sender": "9812345679",
+      "text": "Work from home opportunity. Earn 3000-8000 per day. No investment. Click http://easy-earn.",
+      "level": "DANGEROUS",
+      "hits": [],
+      "p": 0.901
+    },
+    {
+      "cls": "phishing",
+      "sender": "9878901236",
+      "text": "Dear Customer, Your ICICI account has been temporarily locked. Click here to unlock: http:",
+      "level": "SUSPICIOUS",
+      "hits": [
+        "R_SENDER_MISMATCH",
+        "R_BRAND_LINK"
+      ],
+      "p": 0.542
+    },
+    {
+      "cls": "normal",
+      "sender": "AD-IRCTCI",
+      "text": "PNR 4512367890, Train 12951, 28-10-26, SL S5 34. Chart prepared. Happy journey - IRCTC",
+      "level": "SAFE",
+      "hits": [
+        "R_ALLOW_SENDER"
+      ],
+      "p": 0.667
+    },
+    {
+      "cls": "normal",
+      "sender": "VM-SBIINB",
+      "text": "Your SBI credit card statement for Oct is ready. Total due Rs 8,230. Due date 15-Nov. Pay ",
+      "level": "SAFE",
+      "hits": [
+        "R_ALLOW_SENDER"
+      ],
+      "p": 0.432
+    },
+    {
+      "cls": "normal",
+      "sender": "9876505555",
+      "text": "Reached office safely. Will call you during lunch.",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.052
+    },
+    {
+      "cls": "phishing",
+      "sender": "9856789014",
+      "text": "IRCTC refund of Rs 1,450 is pending. Enter your card details to receive refund http://irct",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_SENDER_MISMATCH",
+        "R_OTP_ASK",
+        "R_BRAND_LINK"
+      ],
+      "p": 0.811
+    },
+    {
+      "cls": "normal",
+      "sender": "VK-AMAZON",
+      "text": "Your Amazon order #405-1234567 has been delivered. Thank you for shopping with us.",
+      "level": "SAFE",
+      "hits": [
+        "R_ALLOW_SENDER"
+      ],
+      "p": 0.526
+    },
+    {
+      "cls": "promo",
+      "sender": "VM-PVRCIN",
+      "text": "Watch the latest blockbuster this Friday! Book tickets at pvrcinemas.com and get 10% cashb",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.196
+    },
+    {
+      "cls": "phishing",
+      "sender": "9845678904",
+      "text": "Hi mom, I lost my phone, this is my new number. Please send Rs 15,000 urgently to this UPI",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.319
+    },
+    {
+      "cls": "phishing",
+      "sender": "+918765432109",
+      "text": "HDFC Bank: Your netbanking is suspended due to incomplete KYC. Verify now at hdfc-verify.e",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_URGENT_LINK",
+        "R_SENDER_MISMATCH",
+        "R_BRAND_LINK"
+      ],
+      "p": 0.931
+    },
+    {
+      "cls": "phishing",
+      "sender": "9678901234",
+      "text": "Income Tax Dept: You are eligible for a refund of Rs 15,490. Submit your account details a",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_SENDER_MISMATCH"
+      ],
+      "p": 0.627
+    },
+    {
+      "cls": "phishing",
+      "sender": "9988776655",
+      "text": "आपका खाता आज बंद हो जाएगा। तुरंत KYC अपडेट करें: http://bank-kyc.example/update",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_URGENT_LINK",
+        "R_SENDER_MISMATCH"
+      ],
+      "p": 0.966
+    },
+    {
+      "cls": "normal",
+      "sender": "9812300000",
+      "text": "Didi, aapka parcel neeche guard ke paas rakh diya hai",
+      "level": "DANGEROUS",
+      "hits": [],
+      "p": 0.697
+    },
+    {
+      "cls": "promo",
+      "sender": "AD-CULTFT",
+      "text": "Join cult.fit this month and get 2 extra months free. Visit cult.fit",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.155
+    },
+    {
+      "cls": "phishing",
+      "sender": "9801234561",
+      "text": "Dear customer, KYC verification pending. Your SIM will stop working. Click http://sim-kyc.",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_SENDER_MISMATCH",
+        "R_BRAND_LINK"
+      ],
+      "p": 0.918
+    },
+    {
+      "cls": "promo",
+      "sender": "VM-URBNCL",
+      "text": "Get your home deep cleaned before Diwali. Flat 15% off on Urban Company app.",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.021
+    },
+    {
+      "cls": "normal",
+      "sender": "9876521111",
+      "text": "Wifi password is in this note, also see github.com/torvalds/linux",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.068
+    },
+    {
+      "cls": "phishing",
+      "sender": "9834567890",
+      "text": "To activate your KYC download the app from http://kyc-support.example/kyc.apk and enter yo",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_SENDER_MISMATCH",
+        "R_APP_INSTALL"
+      ],
+      "p": 0.938
+    },
+    {
+      "cls": "promo",
+      "sender": "AD-SHOPKR",
+      "text": "धमाका सेल! सभी मोबाइल पर 40% तक की छूट। आज ही खरीदें",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.105
+    },
+    {
+      "cls": "normal",
+      "sender": "9876517777",
+      "text": "https://en.wikipedia.org/wiki/Gravity_Falls",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.04
+    },
+    {
+      "cls": "normal",
+      "sender": "9876512222",
+      "text": "Papa ki dawai khatam ho gayi hai, wapas aate time le aana",
+      "level": "SAFE",
+      "hits": [],
+      "p": 0.177
+    },
+    {
+      "cls": "normal",
+      "sender": "JD-ICICIB",
+      "text": "Your OTP for ICICI Bank NetBanking is 773201. Never share OTP with anyone including bank s",
+      "level": "SAFE",
+      "hits": [
+        "R_ALLOW_SENDER"
+      ],
+      "p": 0.66
+    },
+    {
+      "cls": "normal",
+      "sender": "AD-SBIINB",
+      "text": "Your KYC has been updated successfully. No further action is needed. - SBI",
+      "level": "SAFE",
+      "hits": [
+        "R_ALLOW_SENDER"
+      ],
+      "p": 0.609
+    },
+    {
+      "cls": "phishing",
+      "sender": "9878901237",
+      "text": "Customs duty of Rs 3,500 is pending for your international parcel. Pay at http://customs-c",
+      "level": "DANGEROUS",
+      "hits": [
+        "R_URGENT_LINK",
+        "R_SENDER_MISMATCH"
+      ],
+      "p": 0.808
+    },
+    {
+      "cls": "normal",
+      "sender": "VK-EPFOHO",
+      "text": "Dear member, Rs 3,600 contribution for Sep 2026 credited to your PF account. EPFO",
+      "level": "SAFE",
+      "hits": [
+        "R_ALLOW_SENDER"
+      ],
+      "p": 0.97
+    }
+  ]
+}

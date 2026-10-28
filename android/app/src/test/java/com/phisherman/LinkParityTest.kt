@@ -25,7 +25,7 @@ class LinkParityTest {
 
     @Test
     fun featuresMatchPython() {
-        assertEquals(30, rows.size)
+        assertTrue(rows.size >= 30)
         val failures = mutableListOf<String>()
         for (row in rows) {
             val got = UrlFeatures.compute(row.url, cfg)

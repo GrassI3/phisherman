@@ -1,7 +1,12 @@
 package com.phisherman
 
 import android.app.Application
-import com.phisherman.link.LinkAnalyser
+import android.content.ComponentName
+import android.service.notification.NotificationListenerService
+import com.phisherman.sms.MessageNotificationListener
+import com.phisherman.voice.CallWatcher
+import com.phisherman.sms.SmsAnalyser
+import com.phisherman.sms.SmsNotifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,7 +17,13 @@ class PhishermanApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // load the model early so the first link tap is fast
-        scope.launch { LinkAnalyser.init(this@PhishermanApp) }
+        SmsNotifier.ensureChannel(this)
+        // a listener enabled while the app was being updated can stay unbound; ask for a rebind
+        if (MessageNotificationListener.isEnabled(this)) {
+            NotificationListenerService.requestRebind(ComponentName(this, MessageNotificationListener::class.java))
+        }
+        CallWatcher.start(this)
+        // load the models early so the first link tap or SMS is fast
+        scope.launch { SmsAnalyser.init(this@PhishermanApp) }
     }
 }

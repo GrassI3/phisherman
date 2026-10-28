@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.phisherman.data.DecisionLog
 import com.phisherman.data.Prefs
+import com.phisherman.engine.Channel
 import com.phisherman.engine.Level
 import com.phisherman.engine.Verdict
 import com.phisherman.link.Forwarder
@@ -60,15 +61,20 @@ class WarningActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val url = intent.getStringExtra(EXTRA_URL) ?: return finish()
         val verdict = Json.decodeFromString<Verdict>(intent.getStringExtra(EXTRA_VERDICT) ?: return finish())
+        val url = intent.getStringExtra(EXTRA_URL) ?: ""
+        val body = intent.getStringExtra(EXTRA_BODY)
+        if (url.isEmpty() && body == null) return finish()
         decisionId = savedInstanceState?.getLong(STATE_ID) ?: 0L
-        if (decisionId == 0L) lifecycleScope.launch { decisionId = DecisionLog.record(this@WarningActivity, verdict) }
+        // SMS verdicts are already logged by the receiver; link warnings log here
+        if (decisionId == 0L && verdict.channel == Channel.LINK) {
+            lifecycleScope.launch { decisionId = DecisionLog.record(this@WarningActivity, verdict) }
+        }
 
         setContent {
             var hindi by remember { mutableStateOf(Prefs.hindi(this)) }
             WarningScreen(
-                url = url, verdict = verdict, hindi = hindi,
+                url = url, body = body, verdict = verdict, hindi = hindi,
                 onToggleLanguage = { hindi = !hindi; Prefs.setHindi(this, hindi) },
                 onGoBack = { act("BACK"); finish() },
                 onReport = {
@@ -105,7 +111,15 @@ class WarningActivity : ComponentActivity() {
     companion object {
         private const val EXTRA_URL = "url"
         private const val EXTRA_VERDICT = "verdict"
+        private const val EXTRA_BODY = "body"
         private const val STATE_ID = "decision_id"
+
+        /** Warning for a message (opened from the SMS notification or the paste box). */
+        fun smsIntent(ctx: Context, body: String, verdict: Verdict): Intent =
+            Intent(ctx, WarningActivity::class.java)
+                .putExtra(EXTRA_BODY, body.take(1000))
+                .putExtra(EXTRA_VERDICT, Json.encodeToString(Verdict.serializer(), verdict))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
         fun intent(ctx: Context, url: String, verdict: Verdict): Intent =
             Intent(ctx, WarningActivity::class.java)
@@ -125,6 +139,7 @@ private val AmberDark = Color(0xFF3D2500)
 @Composable
 private fun WarningScreen(
     url: String,
+    body: String?,
     verdict: Verdict,
     hindi: Boolean,
     onToggleLanguage: () -> Unit,
@@ -139,9 +154,10 @@ private fun WarningScreen(
     BackHandler(onBack = onGoBack)
 
     val t = { en: String, hi: String -> if (hindi) hi else en }
+    val isSms = verdict.channel == Channel.SMS
     val host = verdict.subject
-    val reg = LinkAnalyser.registrableDomain(host)
-    val prefix = host.removeSuffix(reg)
+    val reg = if (isSms) host else LinkAnalyser.registrableDomain(host)
+    val prefix = if (isSms) "" else host.removeSuffix(reg)
 
     Column(
         Modifier.fillMaxSize().background(bg).safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -153,16 +169,29 @@ private fun WarningScreen(
         }
         Text("⚠", fontSize = 56.sp, color = Color.White)
         Text(
-            if (dangerous) t("Dangerous link blocked", "ख़तरनाक लिंक रोका गया") else t("This link looks unsafe", "यह लिंक असुरक्षित लगता है"),
+            when {
+                isSms && dangerous -> t("Scam message detected", "धोखाधड़ी वाला संदेश")
+                isSms -> t("This message looks suspicious", "यह संदेश संदिग्ध लगता है")
+                dangerous -> t("Dangerous link blocked", "ख़तरनाक लिंक रोका गया")
+                else -> t("This link looks unsafe", "यह लिंक असुरक्षित लगता है")
+            },
             color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 36.sp,
         )
         Text(
             buildAnnotatedString {
+                if (isSms) withStyle(SpanStyle(color = Color.White.copy(alpha = 0.6f))) { append(t("From ", "भेजने वाला ")) }
                 withStyle(SpanStyle(color = Color.White.copy(alpha = 0.6f))) { append(prefix) }
                 withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) { append(reg.ifEmpty { host }) }
             },
             fontSize = 24.sp,
         )
+        if (body != null) {
+            Text(
+                body.take(300),
+                color = Color.White.copy(alpha = 0.85f), fontSize = 15.sp,
+                modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)).padding(12.dp),
+            )
+        }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
                 t("Risk ${verdict.score}/100 · ", "जोखिम ${verdict.score}/100 · ") +
@@ -188,12 +217,23 @@ private fun WarningScreen(
             modifier = Modifier.fillMaxWidth().height(64.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = bg),
-        ) { Text(t("Go back (safe)", "वापस जाएँ (सुरक्षित)"), fontSize = 20.sp, fontWeight = FontWeight.Bold) }
-        OutlinedButton(onClick = onReport, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp)) {
-            Text(t("Report this link", "इस लिंक की शिकायत करें"), color = Color.White, fontSize = 16.sp)
+        ) {
+            Text(if (isSms) t("Got it, I won't respond", "समझ गया, जवाब नहीं दूँगा") else t("Go back (safe)", "वापस जाएँ (सुरक्षित)"),
+                fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
-        TextButton(onClick = { confirm = true }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text(t("Open anyway", "फिर भी खोलें"), color = Color.White.copy(alpha = 0.7f), fontSize = 14.sp)
+        if (isSms) {
+            Text(t("Do not click links in it, call back, or share OTP, PIN or card details.",
+                "इसके लिंक पर क्लिक न करें, वापस कॉल न करें, और OTP, PIN या कार्ड की जानकारी न दें।"),
+                color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
+        }
+        OutlinedButton(onClick = onReport, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp)) {
+            Text(if (isSms) t("Report this message", "इस संदेश की शिकायत करें") else t("Report this link", "इस लिंक की शिकायत करें"),
+                color = Color.White, fontSize = 16.sp)
+        }
+        if (!isSms) {
+            TextButton(onClick = { confirm = true }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text(t("Open anyway", "फिर भी खोलें"), color = Color.White.copy(alpha = 0.7f), fontSize = 14.sp)
+            }
         }
     }
 

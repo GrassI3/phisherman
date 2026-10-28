@@ -15,7 +15,7 @@ data class LinkThresholds(val suspicious: Float, val dangerous: Float)
 
 /**
  * Link decision logic; must give the same level and reason id as ml/link_engine.py.
- * Order: scheme -> allowlist -> blocklist -> shortener -> model -> brand-lookalike floor.
+ * Order: scheme -> allowlist -> blocklist -> shortener -> model -> brand floors (lookalike, brand in host).
  */
 class LinkDecider(
     private val cfg: LinkConfig,
@@ -62,6 +62,11 @@ class LinkDecider(
             level = Level.SUSPICIOUS
             score = maxOf(score, 50)
             hits[0] = "brand_lookalike"
+        }
+        if (level == Level.SAFE && UrlFeatures.brandInHost(p.host, p.reg, cfg) != null) {
+            level = Level.SUSPICIOUS
+            score = maxOf(score, 50)
+            hits[0] = "brand_in_host"
         }
         val reasons = if (level == Level.SAFE) emptyList() else LinkReasons.fromUrl(p, f, cfg).ifEmpty { listOf(LinkReasons.MODEL) }
         return done(level, score, reasons, hits, prob)

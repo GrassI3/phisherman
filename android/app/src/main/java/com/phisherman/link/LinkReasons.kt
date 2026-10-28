@@ -28,7 +28,7 @@ object LinkReasons {
                 "Looks like $name, but the real site is $real",
                 "$name जैसा दिखता है, पर असली साइट $real है")
         } else if (!official) {
-            cfg.brandTokens.firstOrNull { it in p.host }?.let { t ->
+            (UrlFeatures.brandInHost(p.host, p.reg, cfg) ?: cfg.brandTokens.firstOrNull { it in p.host })?.let { t ->
                 val name = cfg.brandNames[t] ?: t.uppercase()
                 out += Reason("brand_in_host",
                     "Uses the name $name, but the website is actually ${p.reg.ifEmpty { p.host }}",

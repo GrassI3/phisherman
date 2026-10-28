@@ -12,6 +12,9 @@ object Prefs {
     fun chosenBrowser(ctx: Context): String? = sp(ctx).getString(KEY_BROWSER, null)
     fun setChosenBrowser(ctx: Context, pkg: String) = sp(ctx).edit().putString(KEY_BROWSER, pkg).apply()
 
+    fun autoCallGuard(ctx: Context): Boolean = sp(ctx).getBoolean("auto_call_guard", false)
+    fun setAutoCallGuard(ctx: Context, on: Boolean) = sp(ctx).edit().putBoolean("auto_call_guard", on).apply()
+
     fun hindi(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_HINDI, false)
     fun setHindi(ctx: Context, on: Boolean) = sp(ctx).edit().putBoolean(KEY_HINDI, on).apply()
 }

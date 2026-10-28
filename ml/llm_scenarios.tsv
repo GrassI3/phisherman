@@ -1,0 +1,60 @@
+label	reason	kind	source	sender	text
+SCAM	family_impersonation	msg	WhatsApp	+91 98450 12345	Hi mom, I lost my phone, this is my new number. Please send Rs 15,000 urgently to this UPI, will explain later
+SCAM	family_impersonation	msg	WhatsApp	+91 70123 45678	Papa ye mera naya number hai, purana phone kharab ho gaya. Abhi 20,000 bhej do please, emergency hai, ghar aake batata hoon
+SCAM	family_impersonation	chat	WhatsApp	+91 81234 56789	Them: Hi beta, kaise ho? || You: Who is this? || Them: Arre main tumhara mama, naya number hai. Ek kaam tha || Them: Hospital mein hoon, card nahi chal raha. 30,000 Google Pay kar do, kal wapas kar dunga
+SCAM	family_impersonation	msg	Messages	+91 99876 54321	Bhaiya main Riya, mera phone chori ho gaya. Is number pe paise bhej do, college fees aaj last date hai
+SCAM	authority_impersonation	msg	WhatsApp	+91 98765 11111	This is CEO Rajesh Mehta. I am in a board meeting and cannot talk. I need you to buy 10 Amazon gift cards of Rs 5,000 each for a client. Send me the codes quickly and keep this confidential
+SCAM	authority_impersonation	chat	WhatsApp	+91 99887 22222	Them: Hi, are you at your desk? || You: Yes sir || Them: I need a small favour, I am stuck in a meeting. Please transfer Rs 2,40,000 to our new vendor account today. Details below. Don't discuss with finance, I will sign later
+SCAM	authority_impersonation	msg	Gmail	Accounts Team <finance-dept@vendor-mail.example>	Dear Sir, please note our bank account has changed due to an audit. Kindly make all pending invoice payments to the new account below from today. Treat this as urgent
+SCAM	authority_impersonation	msg	Outlook	IT Helpdesk	Your company mailbox will be deactivated in 24 hours due to a security upgrade. Reply with your employee ID and password to keep access
+SCAM	remote_access	chat	WhatsApp	+91 90000 33333	Them: Hello, IT support from your office. We noticed a virus on your laptop || Them: Please install AnyDesk and share the 9 digit code so I can fix it remotely || You: Is this urgent? || Them: Yes, otherwise your data will be deleted today
+SCAM	remote_access	msg	Messages	+91 91234 00000	Your bank app needs an update. Our executive will help you. Download QuickSupport from Play Store and share the code shown
+SCAM	authority_impersonation	call	Call	Unknown	Caller: Hello, main Mumbai cyber crime branch se Inspector Sharma bol raha hoon. || Caller: Aapke Aadhaar se ek parcel bheja gaya hai jisme drugs mile hain. || Caller: Aapke naam pe FIR hai. Abhi video call pe aaiye, aap digital arrest mein hain. || Caller: Kisi ko mat batana, warna family bhi phas jayegi. || Caller: Case clear karne ke liye verification amount transfer karna hoga.
+SCAM	credential_request	call	Call	Unknown	Caller: Good morning sir, I am calling from SBI head office regarding your KYC. || Caller: Your account will be blocked today if KYC is not updated. || Caller: I have sent an OTP to your mobile, please tell me the OTP to complete verification.
+SCAM	credential_request	call	Call	Unknown	Caller: Sir aapke credit card pe 5000 reward points expire ho rahe hain. || Caller: Main aapko redeem karwa deta hoon. Card ke peeche wala 3 digit number bataiye. || Caller: Aur abhi jo OTP aayega woh bhi bata dijiye.
+SCAM	payment_request	call	Call	Unknown	Caller: Namaste, main electricity board se bol raha hoon. || Caller: Aapka pichle mahine ka bill update nahi hua hai, aaj raat 9 baje connection kat jayega. || Caller: Abhi is number par 1,500 rupaye UPI kar dijiye, main turant update kar dunga.
+SCAM	payment_request	call	Call	Unknown	Caller: Hello, this is customs department at Delhi airport. || Caller: A parcel from London in your name is held with gold and foreign currency. || Caller: You must pay customs duty of 35,000 rupees within one hour or police will come to your house.
+SCAM	job_investment	chat	Telegram	Priya HR	Them: Hi! We are hiring for part time online work, earn 3000 to 8000 daily || Them: Just like YouTube videos and send screenshots || Them: First task is free. For the VIP task you need to deposit Rs 5,000, you will get 8,000 back in 1 hour
+SCAM	job_investment	msg	WhatsApp	+44 7700 900123	Join our stock market tips group. Our members made 300% returns this month. Invest Rs 10,000 today on our trading app and withdraw profits daily
+SCAM	job_investment	chat	Instagram	crypto.queen.official	Them: Hey dear, I saw your profile. I trade crypto and make good money || Them: I can teach you, it's easy. Start with just 20k on this platform || Them: Trust me, I will guide you. Many people already doubled their money
+SCAM	prize_lottery	msg	Instagram	amazon.giveaway.india	Congratulations! You are selected as the lucky winner of our iPhone giveaway. Pay Rs 499 delivery charge to receive your prize
+SCAM	prize_lottery	msg	WhatsApp	+92 300 1234567	KBC Lucky Draw: Aapka number 25 lakh ki lottery mein select hua hai. Prize lene ke liye Rana Pratap se WhatsApp call par baat karein aur processing fee bhejein
+SCAM	credential_request	msg	Messages	+91 98123 98123	Your account will be blocked. Reply with your ATM PIN and card number to keep it active
+SCAM	credential_request	msg	Instagram	instagram.support.team	Your Instagram account has been reported for copyright violation. Verify your account within 24 hours by sending your login password or it will be deleted
+SCAM	credential_request	chat	WhatsApp	+91 87654 32100	Them: Hi, I accidentally sent my verification code to your number || Them: Can you please forward the 6 digit code you just received? || Them: Please, it's urgent
+SCAM	threat_urgency	msg	Messages	+91 76543 21098	TRAI notice: Your mobile number will be disconnected within 2 hours due to illegal activity. Press 9 to talk to our officer
+SCAM	threat_urgency	msg	Gmail	Income Tax Department <noreply@incometax-refund.example>	You have an outstanding tax demand. Failure to pay within 24 hours will result in legal action and account freeze. Pay now using the link
+SCAM	payment_request	msg	WhatsApp	+91 70707 70707	Hello sir, I am army officer posted in Kashmir, want to buy your sofa listed on OLX. I will pay advance. Please scan the QR code I send to receive the money
+SCAM	payment_request	chat	WhatsApp	+91 95555 44444	Them: Sir I want to buy your bike from OLX || Them: I will send money through UPI || Them: I have sent a request, just enter your UPI PIN to receive 25,000
+SCAM	secrecy	msg	WhatsApp	+91 93333 22222	Do not tell anyone about this conversation. Your account is under RBI investigation. Transfer all your balance to the safe account I give you to protect it
+SCAM	other_scam	msg	Messages	+91 92222 11111	Dear customer, your electricity KYC is pending. Call our officer on 9876543210 immediately to avoid disconnection
+SCAM	authority_impersonation	msg	WhatsApp	+91 94444 66666	Main SBI branch manager bol raha hoon. Aapke account mein suspicious transaction hua hai. Account safe rakhne ke liye mujhe apni netbanking details bhejiye
+SCAM	other_scam	msg	Facebook	Loan Help Desk	Instant loan without CIBIL check. Rs 2 lakh approved. Pay Rs 1,999 insurance fee first to release the amount
+SCAM	family_impersonation	call	Call	Unknown	Caller: Hello aunty, main aapke bete ka dost bol raha hoon. || Caller: Uska accident ho gaya hai, hospital mein hai, abhi baat nahi kar sakta. || Caller: Operation ke liye turant 50,000 chahiye, is number pe Google Pay kar dijiye.
+SCAM	remote_access	call	Call	Unknown	Caller: Hello madam, I am from Paytm customer care. Your wallet KYC is incomplete. || Caller: Please install the app called RustDesk, I will complete it for you. || Caller: Now open your bank app so I can check the status.
+SUSPICIOUS	link_lure	msg	WhatsApp	+91 96666 77777	Hey, is this you in this video? Everyone is sharing it
+SUSPICIOUS	other_scam	msg	Messages	+91 91111 22222	Hi dear, wrong number but you seem nice. Can we be friends?
+SUSPICIOUS	payment_request	msg	WhatsApp	Unknown	Hi, I am collecting donations for flood victims. Please send whatever you can to this UPI ID
+SUSPICIOUS	job_investment	msg	LinkedIn	Recruiter Neha	Hi, your profile is shortlisted for a work from home data entry job, salary 45,000 per month. Reply YES to know more
+SAFE	none	msg	WhatsApp	Mummy	Beta khana kha liya? Aaj papa jaldi aa rahe hain
+SAFE	none	msg	WhatsApp	Rahul	Bro send me 500 for the pizza, I paid for everyone. My UPI is the same as last time
+SAFE	none	chat	WhatsApp	Papa	Them: Beta college fees ki last date kab hai? || You: 30 tareekh papa || Them: Theek hai, main kal transfer kar dunga. Receipt bhej dena
+SAFE	none	chat	WhatsApp	Sanjay (Manager)	Them: Hi, did the vendor invoice for October come? || You: Yes, approved by finance || Them: Great, please process it through the usual payment system by Friday
+SAFE	none	msg	Outlook	Priya (HR)	Reminder: please submit your investment declarations on the HR portal by 30 November
+SAFE	none	msg	Gmail	Swiggy	Your order from Domino's has been delivered. Rate your experience
+SAFE	none	msg	Messages	AD-HDFCBK	482913 is your OTP for login. Do not share it with anyone. HDFC Bank never asks for your OTP
+SAFE	none	msg	Messages	Indian Overseas Bank	Your A/c XX4321 is credited with Rs 12,000 on 28-10-2026 by NEFT. Available balance Rs 45,230. - IOB
+SAFE	none	msg	Messages	VM-SBIINB	Rs 2,500 debited from A/c XX7788 on 28Oct26 at Amazon. If not done by you, call 1800 1234 from your registered mobile. - SBI
+SAFE	none	chat	Instagram	aarav_23	Them: Bro did you see the new Gravity Falls episode? || You: Not yet || Them: Watch it, the ending is crazy lol
+SAFE	none	msg	Instagram	neha.sharma	Happy birthday!! Party at my place on Saturday?
+SAFE	none	msg	Telegram	Class Group	Assignment 3 deadline extended to Monday. Submit on the college portal
+SAFE	none	call	Call	Dr. Mehta Clinic	Caller: Hello, this is Dr. Mehta's clinic. || Caller: Your appointment is confirmed for tomorrow at 11. || Caller: Please bring your old reports. Thank you.
+SAFE	none	call	Call	Unknown	Caller: Sir, Amazon delivery hai. || Caller: Aap ghar pe ho? Gate ke paas hoon. || Caller: Theek hai, guard ko de deta hoon.
+SAFE	none	call	Call	Bank Customer Care	You: Hi, I called to block my lost debit card. || Caller: Sure, I have blocked the card ending 4321. || Caller: A new card will be sent to your registered address in 7 days. Please never share your OTP or PIN with anyone.
+SAFE	none	call	Call	Mom	Caller: Kab aa rahe ho ghar? || Caller: Aate time doodh aur sabzi le aana. || Caller: Aur haan, dadi ka phone recharge kar dena.
+SAFE	none	msg	WhatsApp	Office Admin	Team, salary for October has been credited. Payslips are available on the HR portal
+SAFE	none	msg	Gmail	IRCTC	Your ticket is booked. PNR 4512367890, Train 12951, 2 Nov. Happy journey
+SAFE	promo	msg	Instagram	myntra	Big Fashion Days are live! Up to 70% off on top brands
+SAFE	promo	msg	Gmail	Zomato	Flat 50% off on your next 3 orders this weekend. Order now
+SAFE	none	msg	WhatsApp	Ankit	Can you share the OTP you got? Just kidding, never share OTPs haha. Anyway see you at 6
+SAFE	none	chat	WhatsApp	Didi	Them: Ghar ka wifi ka bill bhar diya? || You: Haan kal bhara || Them: Ok thanks, mujhe 600 bhej de apne share ka

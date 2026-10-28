@@ -1,12 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- SMS analysis: read incoming messages as they arrive (no READ_SMS: we never read the inbox) -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <!-- lets the home screen ask to exempt Phisherman from battery optimisation, so the
+         message listener is not frozen in the background (PS4 12.4) -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- call guard: on-device speech recognition in a visible foreground service, plus alerts -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- automatic call guard: call state only (ringing / in call / idle), never the number -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <!-- package visibility: find the real browsers to forward safe links to -->
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
+        </intent>
+        <!-- the on-device speech recogniser service -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 
@@ -47,6 +66,37 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+
+        <!-- only the system (holder of BROADCAST_SMS) can deliver to this receiver -->
+        <receiver
+            android:name=".sms.SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- RCS chats, chat apps and email never send SMS broadcasts; check the text of new notifications instead -->
+        <service
+            android:name=".sms.MessageNotificationListener"
+            android:exported="true"
+            android:label="Phisherman message check"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".voice.CallGuardActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <service
+            android:name=".voice.CallGuardService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <activity
             android:name=".ui.WarningActivity"

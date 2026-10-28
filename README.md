@@ -31,7 +31,7 @@ Every dataset used, with exact name, version, source and date. Raw files live in
 
 | Dataset | Contents | Used for | Status |
 |---|---|---|---|
-| Hinglish / Indian SMS set | At least 100 messages: 40 phishing-style (fake KYC, bank block, reward, courier fee, electricity cut-off, loan / job), 30 genuine transactional (OTP delivery, debit / credit alerts, delivery updates), 30 promotional. Every row marked `synthetic` | SMS model (3 classes: normal / promotional / phishing) and test set | To create (Phase 3) |
+| `ml/sms_india_synthetic.tsv` | 148 hand-written Indian messages, **all synthetic**: 60 phishing (fake KYC, bank block, reward, courier fee, electricity cut-off, loan / job, digital arrest, OTP ask, APK / AnyDesk), 43 normal (OTP delivery, debit / credit alerts, deliveries, family chats), 45 promotional. English, Hinglish and Devanagari; phishing links use non-resolving `.example` domains | SMS model training (70%) and test (30%), stratified by class | Done |
 | `ml/hard_negatives.txt` | 40 benign URLs on official sites: bank and government login portals, OAuth sign-in pages, long queries | Link FPR on hard negatives | Done |
 | `ml/parity_urls.txt` | 30 URLs (10 safe, 10 phishing-like, 10 tricky) | Python vs Kotlin feature and probability parity test; expected values in `parity_expected.csv` | Done |
 | `allowlist.json` | 66 popular / official registrable domains, never applied to free-hosting platforms | Instant SAFE verdicts, fewer false alarms | Done; verify entries |
@@ -65,7 +65,7 @@ python build_blocklist.py              # blocklist.bloom + blocklist.json
 python eval_link_extras.py             # parity file, hard negatives, test links, full-engine unseen check
 ```
 
-Results are written to `ml/results_link.json`. Decision order, mirrored in Kotlin (`ml/link_engine.py` is the reference): non-http(s) ignored → allowlist → blocklist → shortener (always SUSPICIOUS) → Random Forest over 19 URL features (two thresholds) → brand lookalike on a non-official domain raises SAFE to SUSPICIOUS.
+Results are written to `ml/results_link.json`. Decision order, mirrored in Kotlin (`ml/link_engine.py` is the reference): non-http(s) ignored → allowlist → blocklist → shortener (always SUSPICIOUS) → Random Forest over 19 URL features (two thresholds) → brand rules raise SAFE to SUSPICIOUS on non-official domains: `brand_lookalike` (registrable label close to a brand, e.g. `paytrn`) and `brand_in_host` (any host part equal to a brand or one edit away, e.g. `sbi-kyc.example`, added after a live test where that link passed as SAFE).
 
 ### Results (2026-10-28, positive class = phishing, FDR = recall)
 
@@ -112,6 +112,40 @@ Results on the demo phone (S21 FE, Android 14), 2026-10-28:
 | Device links via a real VIEW intent | L1–L5 and L9 warn, L6–L7 forwarded to Chrome (L8 and L10 checked in the parity tests; `tel:` never reaches Phisherman because it only registers for http/https) |
 | Scoring latency (decision log) | median 2 ms, max 110 ms (first call after load) |
 | Tap-to-screen time (`am start -W`) | ~150–400 ms, warning or forward |
+
+## SMS analysis (Phase 3)
+
+### Pipeline
+
+1. **Normalise** (`ml/normalize.py`, Kotlin twin `sms/SmsNormalizer.kt`): lower-case, emoji removed, links extracted and replaced with `urltoken`, long numbers → `numtoken`, 4–8 digit codes → `otpcode`, `cl1ck` → `click`, Hinglish variants unified (`band`/`blocked` → `block`, `turant` → `jaldi`, `aadhar` → `aadhaar` …).
+2. **Model**: TF-IDF word 1–2 grams + character 3–5 grams, logistic regression, exported as `sms_model.json` (1.0 MB, no ONNX needed).
+3. **Rules** (`ml/sms_engine.py`, Kotlin `sms/SmsDecider.kt`): `R_OTP_ASK` and `R_APP_INSTALL` → DANGEROUS; `R_BRAND_LINK` → at least SUSPICIOUS; `R_URGENT_LINK` and `R_SENDER_MISMATCH` add +0.15 to the score; every link is also scored by the link engine and the message is at least as risky as its worst link; `R_ALLOW_SENDER` caps a message from a registered header (e.g. `AD-HDFCBK`) at SAFE when every link in it is safe and no OTP / app / brand rule fired.
+4. **RCS and chat apps**: a live test showed that a message sent from another Android phone arrived as an **RCS chat** in Google Messages, which never triggers the SMS broadcast. `MessageNotificationListener` therefore also reads new-message notifications from Google Messages, Samsung Messages, WhatsApp, WhatsApp Business and Telegram and sends them through the same engine (the user enables it from the home screen; text is analysed on the phone and never stored). Duplicates of the same text from the SMS broadcast and the notification are dropped. A second live test showed that on Samsung One UI the listener stopped receiving once the app went to sleep, and only resumed when the app was opened. Fixes: the listener asks to be re-bound whenever it is disconnected and on app start, and the home screen asks for a battery-optimisation exemption ("Keep protection running"). With the exemption, a test message was caught while the phone was forced into Doze with the app in the background.
+5. **On the phone**: `SmsReceiver` (protected by `BROADCAST_SMS`, multipart joined, dual-SIM duplicates dropped) → heads-up notification with the top reason → tap opens the warning screen with the message, sender and reasons. The paste box on the home screen runs the same pipeline. Phisherman shows a warning right after arrival; it does not block or hide the SMS.
+
+Rebuild: `cd ml && python train_sms.py` (writes `sms_model.json`, `thresholds.json["sms"]`, `results_sms.json`, `sms_parity_expected.tsv`).
+
+### Results (2026-10-28, positive class = phishing / scam)
+
+| Test set | Precision | Recall (FDR) | FPR | N (phishing) |
+|---|---|---|---|---|
+| Full engine, all test messages | 0.945 | 0.965 | 0.86% | 1,077 (143) |
+| Full engine, UCI held-out | 0.945 | 0.968 | 0.77% | 1,029 (125) |
+| Full engine, Indian synthetic held-out | 0.944 | 0.944 | 3.3% | 48 (18) |
+| Model only, Indian synthetic held-out | 0.680 | 0.944 | 27% | 48 (18) |
+| Promotional messages flagged (Indian held-out) | | | 0 / 14 | 14 |
+
+- The Indian set is small (45 test messages) and synthetic; treat its numbers as indicative only.
+- The rules matter: on Indian messages the model alone over-flags genuine bank and brand messages (33% FPR); the trusted-header and link rules bring this to 3.7%.
+- Live false alarm, fixed: any chat message that was mostly a link (YouTube, Wikipedia, thisisnotawebsitedotcom.com) scored ~1.0, because in UCI almost every message with a link is spam and the model learned "link = scam". Links are now removed before the text model (normaliser `sms-norm-2`), each link is judged only by the link engine, and a message with fewer than 4 words next to a link takes the link's verdict. Cost: recall 0.986 → 0.965 on the full test set. Ten everyday chat messages with legitimate links were added to the Indian set.
+- Live false alarm, fixed: a genuine Indian Overseas Bank message arrived as a verified RCS business chat (sender shown as a name, not a header like `VM-IOBCHN`), so the trusted-sender rule did not apply and the model alone flagged it. In Google / Samsung Messages a sender shown as a name is now treated like a registered header (saved contact or verified business); WhatsApp names are not trusted. Numbers written with a leading 0 (`099752 17785`) now count as personal mobile numbers.
+- Known misses: a "Hi mom, new number, send money" impersonation scam (no link, no credential words), and a harmless Hinglish delivery note flagged amber because of the word "parcel".
+- UCI spam is treated as scam; it contains many prize / premium-rate scams but is English and UK-centric.
+
+### Tests
+
+- `SmsParityTest` (JVM): normaliser text and extracted links identical to Python, probability within 1e-6, same level and rule hits on 52 messages (all Indian test messages plus edge cases).
+- On the phone, the PS4 §13.3 messages S1–S7 were fed through the real receiver pipeline (debug-only `DebugSmsReceiver`, because a real SMS cannot be injected over adb): S1, S4, S6, S7 raised a scam notification with the right reason; S2 (OTP delivery), S3 (debit alert) and S5 (promo) stayed silent.
 
 ## External dependencies
 

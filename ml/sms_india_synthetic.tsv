@@ -1,0 +1,159 @@
+label	sender	text
+phishing	9876543210	Dear customer your SBI account will be blocked today. Update KYC immediately: http://sbi-kyc-update.example/login
+phishing	+918765432109	HDFC Bank: Your netbanking is suspended due to incomplete KYC. Verify now at hdfc-verify.example to avoid permanent block
+phishing	9123456780	Aapka bank khata aaj band ho jayega. Turant KYC update karein: http://kyc-update-bank.example
+phishing	9988776655	आपका खाता आज बंद हो जाएगा। तुरंत KYC अपडेट करें: http://bank-kyc.example/update
+phishing	8899001122	Dear user your PAN is not linked with Aadhaar. Your account will be freezed in 24 hrs. Link now bit.ly/pan-link-now
+phishing	7766554433	Electricity bill unpaid. Your power will be disconnected tonight at 9.30 pm. Call electricity officer 9812345670 immediately
+phishing	9090909090	Dear consumer, your electricity connection will be cut today due to pending bill. Pay now: http://power-bill-pay.example
+phishing	8080808080	Bijli ka bill pending hai, aaj raat connection kat jayega. Turant is number par call karein 9876501234
+phishing	7012345678	India Post: Your parcel is on hold due to incomplete address. Pay Rs 25 redelivery fee at http://indiapost-redeliver.example
+phishing	6201234567	Your courier could not be delivered. Update your address and pay Rs 12 fee: http://courier-track.example/pay
+phishing	9345678901	Congratulations! You have won Rs 25,00,000 in KBC lottery. Call Rana Pratap 9876012345 to claim your prize
+phishing	9456789012	Your HDFC credit card reward points worth Rs 7,450 expire today. Redeem now: http://hdfc-rewards.example/redeem
+phishing	9567890123	SBI Yono reward points 9840 expiring today. Redeem at http://yono-points.example before midnight
+phishing	9678901234	Income Tax Dept: You are eligible for a refund of Rs 15,490. Submit your account details at http://itr-refund.example
+phishing	9789012345	Your Aadhaar is suspended. Update biometric details now at http://uidai-update.example or your Aadhaar will be cancelled
+phishing	9890123456	Dear customer, share the OTP sent to your mobile to confirm the delivery of your order
+phishing	9901234567	Your account is blocked. Please send the OTP you received to this number to unblock it
+phishing	9812345678	Bank se bol raha hoon, aapke phone par jo OTP aaya hai woh batao, account verify karna hai
+phishing	9823456789	Sir aapke card ka CVV aur expiry date bhejo, card band hone se bachane ke liye
+phishing	9834567890	To activate your KYC download the app from http://kyc-support.example/kyc.apk and enter your details
+phishing	9845678901	Install AnyDesk app and share the code with our support executive to get your refund processed
+phishing	9856789012	Customer care: please download QuickSupport app from the link and share the 9 digit code to fix your UPI issue
+phishing	9867890123	Your FASTag KYC has expired. Update now to avoid blacklisting: http://fastag-kyc.example
+phishing	9878901234	Traffic challan of Rs 2000 is pending on your vehicle. Pay now to avoid court action: http://echallan-pay.example
+phishing	9889012345	Mumbai Police Cyber Cell: A parcel with drugs in your name was seized by customs. Call 9811122233 immediately or face arrest
+phishing	9890123457	CBI notice: Your Aadhaar is linked to a money laundering case. Do not tell anyone. Call officer now 9822233344
+phishing	9801234568	Congratulations! You are selected for a part time job. Earn Rs 5000 daily by liking YouTube videos. WhatsApp http://wa-job.example
+phishing	9812345679	Work from home opportunity. Earn 3000-8000 per day. No investment. Click http://easy-earn.example to register
+phishing	9823456780	Your loan of Rs 5,00,000 is approved at 0% interest. Pay processing fee Rs 999 to get amount: http://instant-loan.example
+phishing	9834567891	Pre-approved personal loan Rs 3 lakh. No documents needed. Apply now bit.ly/loan-now-fast
+phishing	9845678902	Invest Rs 10,000 and get Rs 50,000 in 7 days. Guaranteed crypto returns. Join http://crypto-double.example
+phishing	9856789013	Dear user, your Netflix subscription has expired. Update payment details to continue: http://netflix-renew.example
+phishing	9867890124	Your Jio number will be deactivated in 2 hours. Complete eKYC now at http://jio-ekyc.example
+phishing	9878901235	TRAI: Your SIM card will be blocked within 2 hours due to illegal activity. Press 9 or call 9800011122
+phishing	9889012346	PM Kisan: Rs 6000 installment is pending. Update your bank details at http://pmkisan-update.example
+phishing	9890123458	Scholarship of Rs 48,000 approved for you. Pay registration fee Rs 499 at http://scholarship-portal.example
+phishing	9801234569	You have received Rs 5,000 from Amit. To receive money enter your UPI PIN at http://upi-receive.example
+phishing	9812345670	Paytm: Your KYC is pending. Your wallet will be blocked today. Complete KYC at http://paytm-kyc.example
+phishing	9823456781	PhonePe cashback of Rs 2,000 credited. Claim now before it expires: http://phonepe-cashback.example
+phishing	9834567892	Amazon: You won an iPhone 15 in our lucky draw. Pay Rs 99 delivery charge to claim: http://amazon-luckydraw.example
+phishing	9845678903	Flipkart Big Billion lucky winner! Claim your Rs 10,000 gift voucher now http://flipkart-gift.example
+phishing	9856789014	IRCTC refund of Rs 1,450 is pending. Enter your card details to receive refund http://irctc-refund.example
+phishing	9867890125	LPG gas connection will be disconnected today. Update KYC with Indane at http://lpg-kyc.example
+phishing	9878901236	Dear Customer, Your ICICI account has been temporarily locked. Click here to unlock: http://icici-unlock.example/verify
+phishing	9889012347	URGENT: Last warning. Your account will be permanently closed. Verify your identity now http://secure-verify.example
+phishing	9890123459	Mubarak ho! Aapne Rs 50,000 jeete hain. Paisa lene ke liye apni bank details bhejein
+phishing	9801234560	Aapka loan approve ho gaya hai. Processing fee Rs 500 turant bhejiye is UPI ID par: loanhelp@ybl
+phishing	9812345671	आपका पैन कार्ड ब्लॉक हो गया है। अभी अपडेट करें http://pan-update.example
+phishing	9823456782	बधाई हो! आपने 25 लाख की लॉटरी जीती है। इनाम पाने के लिए इस नंबर पर कॉल करें 9876543211
+phishing	9834567893	Your Axis Bank debit card is blocked. Call customer care 9811223344 and share card number to reactivate
+phishing	VM-ALERTS	Your account has been debited Rs 49,999. If not done by you click http://dispute-txn.example to cancel the transaction
+phishing	AD-REWARD	Dear customer you have won a reward of Rs 4,999. Claim now http://claim-reward.example
+phishing	9845678904	Hi mom, I lost my phone, this is my new number. Please send Rs 15,000 urgently to this UPI, will explain later
+phishing	9856789015	Your electricity KYC is not updated. Download the BSES app from http://bses-app.example/update.apk to avoid disconnection
+phishing	9867890126	Dear user, your bank account will be suspended. Reply with your ATM PIN to keep it active
+phishing	9878901237	Customs duty of Rs 3,500 is pending for your international parcel. Pay at http://customs-clear.example within 24 hours
+phishing	9889012348	Aapka Aadhaar card kisi illegal case me use hua hai. Police verification ke liye video call par aaiye, kisi ko mat batana
+phishing	9890123450	Your credit card limit increase request is approved. Confirm by sharing the OTP sent to your phone
+phishing	9801234561	Dear customer, KYC verification pending. Your SIM will stop working. Click http://sim-kyc.example and enter Aadhaar number
+normal	AD-HDFCBK	123456 is your OTP for transaction of Rs 2,500 at Amazon. Valid for 10 mins. Do not share it with anyone. HDFC Bank
+normal	VM-SBIINB	Dear Customer, 482910 is your OTP for login to SBI Online. Do not share it with anyone. SBI never asks for OTP.
+normal	JD-ICICIB	Your OTP for ICICI Bank NetBanking is 773201. Never share OTP with anyone including bank staff.
+normal	AD-HDFCBK	Rs 500.00 debited from a/c **1234 on 28-10-26 to VPA shop@okaxis. Not you? Call 18002586161. HDFC Bank
+normal	VM-SBIBNK	Your A/c XX4321 is credited by Rs 45,000.00 on 28Oct26 by salary. Avl Bal Rs 62,340.15 - SBI
+normal	BZ-AXISBK	INR 1,250.00 spent on Axis Bank Card XX9876 at SWIGGY on 28-10-26. Avl Lmt INR 48,750
+normal	AX-KOTAKB	Rs 2,000 credited to your Kotak A/c XX2211 by UPI from RAHUL SHARMA. Ref 6301234567
+normal	VK-AMAZON	Your Amazon order #405-1234567 has been delivered. Thank you for shopping with us.
+normal	AD-FLPKRT	Your Flipkart order for boAt Airdopes is out for delivery today. Delivery agent: Ramesh 9876500000
+normal	VM-SWIGGY	Your Swiggy order from Domino's is on the way. Track: swiggy.com
+normal	AD-IRCTCI	PNR 4512367890, Train 12951, 28-10-26, SL S5 34. Chart prepared. Happy journey - IRCTC
+normal	VK-UIDAIN	Your Aadhaar update request has been processed successfully. Download e-Aadhaar from uidai.gov.in
+normal	AX-JIOINF	Recharge of Rs 299 successful for Jio number 98XXXXXX10. Validity 28 days. Data 2GB/day.
+normal	AD-AIRTEL	Your Airtel bill of Rs 599 has been paid successfully. Thank you.
+normal	9876501111	Mummy main ghar 8 baje tak aa jaunga, khana bana ke rakhna
+normal	9876502222	Bhai kal cricket khelne chalega? 7 baje ground pe milte hain
+normal	9876503333	Meeting shifted to 4 pm. Please bring the project report.
+normal	9876504444	Happy birthday beta! Bahut saara pyaar. Shaam ko call karna
+normal	9876505555	Reached office safely. Will call you during lunch.
+normal	9876506666	Can you pick up milk and bread on your way home?
+normal	9876507777	कल सुबह 10 बजे डॉक्टर के पास चलना है, याद रखना
+normal	VM-APOLLO	Your appointment with Dr. Mehta is confirmed for 29-Oct at 11:30 AM. Apollo Clinic, Andheri.
+normal	AD-HDFCBK	EMI of Rs 12,450 for loan a/c XX5678 is due on 05-Nov. Please maintain sufficient balance. HDFC Bank
+normal	VM-SBIINB	Your SBI credit card statement for Oct is ready. Total due Rs 8,230. Due date 15-Nov. Pay via YONO or onlinesbi.sbi
+normal	BZ-PAYTMB	Rs 150 paid to Sharma Tea Stall via Paytm UPI. UPI Ref 630198765432
+normal	AD-PHONPE	You paid Rs 340 to Big Bazaar using PhonePe. Txn ID T2610281234
+normal	VK-BESCOM	Your electricity bill of Rs 1,240 for Oct is generated. Due date 10-Nov. Pay via the official BESCOM app or bescom.co.in
+normal	AD-INDANE	Your LPG refill booking 123456789 is confirmed. Delivery expected in 2 days. Indane
+normal	VM-ICICIB	Your ICICI Bank FD of Rs 1,00,000 has been renewed for 1 year at 7.1% p.a.
+normal	9876508888	Sir, I will be on leave tomorrow due to fever. Will complete the pending work on Monday.
+normal	9876509999	Kal ka plan cancel, baarish bahut hai. Sunday ko chalte hain
+normal	AD-DELHIV	Your Delhivery shipment AWB 1234567890 will be delivered today between 2-6 PM.
+normal	VM-OLACAB	Your Ola ride with Suresh (KA01AB1234) is arriving in 3 mins. OTP for ride: 4821
+normal	VK-UBERIN	Your Uber trip receipt: Rs 213 for ride on 28 Oct. Thanks for riding with Uber.
+normal	AD-ZOMATO	Your Zomato order has been delivered. Enjoy your meal! Rate your order in the app.
+normal	9812300000	Didi, aapka parcel neeche guard ke paas rakh diya hai
+normal	VM-HDFCLF	Premium of Rs 25,000 for policy 12345678 received. Thank you. HDFC Life
+normal	AD-NSDLCA	Your PAN application acknowledgement number 881234567890 has been received. Track status on the official NSDL website.
+normal	VK-EPFOHO	Dear member, Rs 3,600 contribution for Sep 2026 credited to your PF account. EPFO
+normal	9876511111	Bro the notes for tomorrow's exam are in the group. Check WhatsApp.
+normal	AD-SBIINB	Your KYC has been updated successfully. No further action is needed. - SBI
+normal	VM-AXISBK	Dear customer, your new debit card has been dispatched by Speed Post. Track with AWB EK123456789IN
+normal	9876512222	Papa ki dawai khatam ho gayi hai, wapas aate time le aana
+phishing	9801234562	SBI: Dear user your YONO account is blocked today, update PAN immediately http://yono-pan.example
+promo	VM-MYNTRA	Big Fashion Days are LIVE! Flat 50-80% off on top brands. Shop now: myntra.com
+promo	AD-FLPKRT	The Big Billion Days sale starts tomorrow! Up to 80% off on mobiles. Set reminder on the Flipkart app
+promo	VK-AMAZON	Great Indian Festival: Up to 70% off on electronics. Shop now at amazon.in
+promo	AD-JIOINF	Get 2GB extra data daily with Rs 349 plan. Recharge now on MyJio app.
+promo	VM-AIRTEL	Unlimited 5G data with Airtel Rs 399 plan. Recharge on Airtel Thanks app.
+promo	BZ-DOMINO	Buy 1 Get 1 free on all medium pizzas this weekend! Order on dominos.co.in
+promo	AD-SWIGGY	Hungry? Get 60% off up to Rs 120 on your next order. Use code TRYNEW. Order on Swiggy
+promo	VM-ZOMATO	Weekend special: Free delivery on orders above Rs 199. Order now on Zomato
+promo	AD-BIGBZR	Diwali Dhamaka Sale! Extra 20% off on groceries this week at your nearest store.
+promo	VK-RELIAN	Reliance Digital festive sale: Up to Rs 15,000 off on LED TVs. Visit store today.
+promo	AD-LENSKR	Buy 1 Get 1 free on eyeglasses at Lenskart. Book a free eye test at lenskart.com
+promo	VM-PVRCIN	Watch the latest blockbuster this Friday! Book tickets at pvrcinemas.com and get 10% cashback
+promo	AD-BYJUSS	Free trial class for class 10 maths. Book your slot on the BYJU'S app today.
+promo	VK-UPGRAD	Upskill with an online MBA. Scholarships available. Apply on upgrad.com
+promo	AD-NYKAAA	Pink Friday sale: Up to 50% off on beauty products. Shop on Nykaa
+promo	VM-AJIOOO	AJIO Big Bold Sale: Min 60% off on 5000+ brands. Shop on ajio.com
+promo	AD-MAKEMY	Fly home this Diwali! Flat 12% off on domestic flights with MakeMyTrip. Book at makemytrip.com
+promo	VK-OYOROM	Weekend getaway? Get rooms from Rs 799 on OYO. Book on the OYO app
+promo	AD-TATACL	Tata CLiQ Luxury sale: up to 40% off on watches. Shop at tatacliq.com
+promo	VM-DMARTT	DMart Ready: Free delivery on your first order above Rs 1000.
+promo	AD-HDFCBK	Get pre-approved personal loan up to Rs 10 lakh instantly on HDFC Bank MobileBanking app. T&C apply.
+promo	VM-ICICIB	Upgrade to ICICI Bank Sapphiro credit card and get 4 airport lounge visits. Apply via iMobile app. T&C apply
+promo	AD-SBICRD	Shop with SBI Card this festive season and get 10% instant discount on Amazon. T&C apply
+promo	VK-PAYTMM	Recharge with Paytm and get assured cashback up to Rs 50. Valid till Sunday.
+promo	AD-PHONPE	Pay electricity bills on PhonePe and get a scratch card worth up to Rs 100.
+promo	VM-CROMAA	Croma festive offers: No cost EMI on laptops. Visit nearest Croma store.
+promo	AD-DECATH	Decathlon running week: 20% off on running shoes. Shop at decathlon.in
+promo	VK-BIGBSK	bigbasket: Get fresh fruits and vegetables delivered in 30 mins. Use code FRESH50
+promo	AD-BLINKT	Blinkit: Diwali sweets delivered in 10 minutes. Order now on the Blinkit app
+promo	VM-URBNCL	Get your home deep cleaned before Diwali. Flat 15% off on Urban Company app.
+promo	AD-HOTSTR	The World Cup final streams live on JioHotstar. Watch on the app.
+promo	VK-SPOTFY	Get 3 months of Spotify Premium for Rs 59. Limited time offer.
+promo	AD-CULTFT	Join cult.fit this month and get 2 extra months free. Visit cult.fit
+promo	VM-MEESHO	Meesho Mega Blockbuster Sale: Products starting at Rs 49. Shop on the Meesho app
+promo	AD-PEPPRF	Pepperfry sofa sale: Up to 60% off. Free delivery. Shop at pepperfry.com
+promo	VK-BOATLF	boAt Diwali sale: Earbuds starting Rs 799. Shop at boat-lifestyle.com
+promo	AD-RELJIO	JioFiber: Get 30 days free on new connection. Book on the MyJio app
+promo	VM-ACKOIN	Car insurance renewal due. Save up to 85% on own damage premium with ACKO. Renew on acko.com
+promo	AD-POLBZR	Compare and buy term insurance plans on Policybazaar. Plans starting Rs 490/month
+promo	VK-HDFCMF	Start a SIP with just Rs 500 per month in HDFC Mutual Fund. Mutual fund investments are subject to market risks.
+promo	AD-ZERODH	Open a free demat account with Zerodha in 10 minutes. Visit zerodha.com
+promo	VM-KFCIND	KFC Bucket deal: 8 pc chicken at Rs 499 today only. Order on the KFC app.
+promo	AD-BATAIN	Bata festive sale: Flat 30% off on footwear at all Bata stores.
+promo	VK-VSALES	Diwali offer! Sabhi kapdon par 50% tak ki chhoot. Aaj hi apne nazdeeki store aayein
+promo	AD-SHOPKR	धमाका सेल! सभी मोबाइल पर 40% तक की छूट। आज ही खरीदें
+normal	Konnad Arrives	bro see this https://youtu.be/dQw4w9WgXcQ
+normal	9876513333	thisisnotawebsitedotcom.com lol gravity falls is crazy
+normal	9876514444	Check this reel https://www.instagram.com/reel/C1a2b3c4d5/
+normal	9876515555	Here is the project doc https://docs.google.com/document/d/1AbCdEfGh/edit
+normal	9876516666	Join the meeting at 5: https://meet.google.com/abc-defg-hij
+normal	9876517777	https://en.wikipedia.org/wiki/Gravity_Falls
+normal	9876518888	yeh dekh bhai kitna sasta hai https://www.amazon.in/dp/B0CX1234
+normal	9876519999	Location bhej raha hoon https://maps.google.com/?q=28.6315,77.2167
+normal	9876520000	New song is out https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC
+normal	9876521111	Wifi password is in this note, also see github.com/torvalds/linux
